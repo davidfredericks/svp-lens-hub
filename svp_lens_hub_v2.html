@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lens — SVP Marketing Weekly Highlights</title>
+<!-- Firebase (compat SDK — no build step required) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root{
+  --navy:#0a2240;--navy2:#123460;--teal:#1a7a6e;--teal-light:#e8f5f3;
+  --red:#c0392b;--red-light:#fdf0ef;--green:#1e7e45;--green-light:#eaf5ee;
+  --purple:#4a2c8a;--purple-light:#f0ebfa;--purple-mid:#6441b8;
+  --blue:#1a6aaa;--blue-light:#e8f1fa;--gold:#c8973a;--gray-bg:#eef0f4;
+  --gray-border:#dde1e8;--text:#1a1f2e;--muted:#5a6375;--white:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--gray-bg);color:var(--text);min-height:100vh;}
+
+header{background:var(--navy);border-bottom:3px solid var(--teal);}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 28px;height:62px;display:flex;align-items:center;}
+.header-left{display:flex;align-items:center;gap:13px;flex:1;}
+.logo-mark{width:54px;height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-mark svg{width:54px;height:54px;}
+.brand-name{font-size:16px;font-weight:900;color:#fff;letter-spacing:.06em;text-transform:uppercase;line-height:1.1;}
+.brand-sub{font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.18em;text-transform:uppercase;margin-top:3px;font-weight:400;}
+.header-center{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+.hdr-sep{width:1px;height:30px;background:rgba(255,255,255,.15);margin:0 6px;}
+.week-nav-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.week-nav-btn:hover{background:rgba(255,255,255,.22);}
+.week-info{text-align:center;min-width:168px;}
+.week-info .wl{font-size:9px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.12em;}
+.week-info .wd{font-size:14px;font-weight:700;color:#fff;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;}
+.btn-new{background:var(--teal);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;letter-spacing:.02em;transition:background .15s;white-space:nowrap;}
+.btn-new:hover{background:#135f55;}
+.btn-hdr{background:transparent;color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.btn-hdr:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+.page-title{background:#fff;border-bottom:1px solid var(--gray-border);padding:20px 28px 18px;}
+.page-title-inner{max-width:1200px;margin:0 auto;}
+.pt-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:7px;}
+.pt-h1{font-size:26px;font-weight:800;color:var(--navy);margin-bottom:10px;letter-spacing:-.01em;}
+.pt-badge{display:inline-flex;align-items:center;gap:7px;background:var(--teal-light);border:1px solid #b0d9d4;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--teal);}
+
+.stats-bar{background:#fff;border-bottom:2px solid var(--navy);}
+.stats-inner{max-width:1200px;margin:0 auto;display:flex;}
+.stat-block{flex:1;padding:16px 24px;border-right:1px solid var(--gray-border);}
+.stat-block:last-child{border-right:none;}
+.stat-num-row{display:flex;align-items:baseline;gap:5px;margin-bottom:4px;}
+.stat-big{font-size:30px;font-weight:800;line-height:1;}
+.stat-arr{font-size:14px;opacity:.28;font-weight:400;}
+.stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+
+/* ── 3-CARD SUMMARY ── */
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
+.sum-card{background:#fff;border:1px solid var(--gray-border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.sum-card-hdr{padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:2px solid;}
+.sum-card-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;}
+.sum-badge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-left:auto;}
+.sum-card-body{flex:1;}
+.sum-empty{padding:20px 18px;font-size:12.5px;color:var(--muted);font-style:italic;text-align:center;}
+.sum-all-clear{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 18px;font-size:12.5px;color:var(--green);font-weight:600;background:var(--green-light);margin:12px 14px;border-radius:8px;}
+.sum-item{padding:9px 18px;border-bottom:1px solid #f2f4f7;font-size:12.5px;line-height:1.5;display:flex;align-items:flex-start;gap:9px;}
+.sum-item:last-child{border-bottom:none;}
+.sum-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.sum-inner{flex:1;min-width:0;}
+.sum-meta{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.55;margin-bottom:1px;}
+.sum-go{flex-shrink:0;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;margin-top:1px;}
+.sum-card.carry .sum-card-hdr{border-color:#d4a017;background:#fffbf0;}
+.sum-card.carry .sum-card-title{color:#7a5200;}
+.sum-card.carry .sum-badge{background:#d4a017;}
+.sum-card.carry .sum-dot{background:#d4a017;}
+.sum-card.carry .sum-go{background:#fff8e8;color:#7a5200;border:1px solid #f0d080;}
+.sum-card.carry .sum-go:hover{background:#f5e8a0;}
+.sum-card.action-card .sum-card-hdr{border-color:var(--red);background:var(--red-light);}
+.sum-card.action-card .sum-card-title{color:var(--red);}
+.sum-card.action-card .sum-badge{background:var(--red);}
+.sum-card.action-card .sum-dot{background:var(--red);}
+.sum-card.action-card .sum-go{background:var(--red-light);color:var(--red);border:1px solid #f0cbc8;}
+.sum-card.action-card .sum-go:hover{background:#fbe0de;}
+.sum-card.intel .sum-card-hdr{border-color:var(--navy);background:var(--navy);}
+.sum-card.intel .sum-card-title{color:rgba(255,255,255,.9);letter-spacing:.1em;}
+.sum-card.intel .sum-badge{background:var(--teal);}
+.intel-item{padding:10px 18px;border-bottom:1px solid #f0f2f5;}
+.intel-item:last-child{border-bottom:none;}
+.intel-cat{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--teal);margin-bottom:3px;}
+.intel-text{font-size:12.5px;color:var(--text);line-height:1.55;}
+
+/* ── PAID MEDIA ── */
+.pm-module{background:#fff;border:1px solid #c5b5ec;border-top:4px solid var(--purple-mid);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.pm-header{background:var(--navy);}
+.pm-header-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 22px 14px;}
+.pm-header-left{display:flex;align-items:center;gap:12px;}
+.pm-icon{width:36px;height:36px;background:rgba(100,65,184,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pm-title{font-size:14px;font-weight:700;color:#fff;}
+.pm-subtitle{font-size:11px;color:rgba(255,255,255,.42);margin-top:2px;}
+.pm-dash-links{display:flex;gap:8px;flex-wrap:wrap;padding:0 22px 14px;}
+.pm-dash-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;}
+.pm-dash-btn.ocli{background:rgba(26,122,110,.18);border:1px solid rgba(26,122,110,.45);color:#7dddd4;}
+.pm-dash-btn.ocli:hover{background:rgba(26,122,110,.3);}
+.pm-dash-btn.lasik{background:rgba(100,65,184,.2);border:1px solid rgba(100,65,184,.5);color:#c8aff8;}
+.pm-dash-btn.lasik:hover{background:rgba(100,65,184,.32);}
+.pm-tabs{display:flex;background:rgba(0,0,0,.18);overflow-x:auto;}
+.pm-tab{padding:9px 18px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;user-select:none;}
+.pm-tab:hover{color:rgba(255,255,255,.72);}
+.pm-tab.active{color:#fff;border-bottom-color:var(--purple-mid);}
+.pm-body{padding:20px 22px;}
+.pm-week-meta{font-size:13px;color:var(--muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--gray-border);line-height:1.65;}
+.pm-section{margin-bottom:20px;}
+.pm-section:last-child{margin-bottom:0;}
+.pm-section-label{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:4px 12px;border-radius:20px;margin-bottom:11px;}
+.pm-section-label.ocli{background:var(--teal-light);color:var(--teal);}
+.pm-section-label.lasik{background:var(--purple-light);color:var(--purple-mid);}
+.sl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pm-section-label.ocli .sl-dot{background:var(--teal);}
+.pm-section-label.lasik .sl-dot{background:var(--purple-mid);}
+.pm-list{list-style:none;padding:0;}
+.pm-list>li{padding:12px 0;border-bottom:1px solid #f2f4f7;font-size:13.5px;line-height:1.65;color:var(--text);}
+.pm-list>li:last-child{border-bottom:none;}
+.pm-item-row{display:flex;align-items:flex-start;gap:10px;}
+.pm-bl{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:7px;}
+.pm-list.ocli .pm-bl{background:var(--teal);}
+.pm-list.lasik .pm-bl{background:var(--purple-mid);}
+.pm-li-body{flex:1;}
+.pm-li-body ul{margin-top:6px;padding-left:18px;list-style:disc;}
+.pm-li-body ul li{font-size:13px;color:var(--muted);padding:2px 0;line-height:1.55;}
+.pm-note{background:#fffbf0;border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 7px 7px 0;font-size:12.5px;color:#6b4e00;margin-top:8px;line-height:1.55;}
+.pm-rec{background:var(--purple-light);border-left:3px solid var(--purple-mid);padding:8px 12px;border-radius:0 7px 7px 0;font-size:12.5px;color:#3a1f70;margin-top:8px;line-height:1.55;}
+.pm-item-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.pm-comment-zone{margin-top:10px;padding-top:10px;border-top:1px dashed #d8cef0;}
+.pm-comment-saved{font-size:12.5px;color:var(--purple-mid);background:var(--purple-light);border-left:3px solid var(--purple-mid);padding:7px 11px;border-radius:0 6px 6px 0;margin-bottom:7px;line-height:1.5;white-space:pre-wrap;}
+.pm-comment-saved .cm-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--purple-mid);opacity:.7;display:block;margin-bottom:3px;}
+.pm-input-row{display:flex;gap:8px;align-items:flex-start;}
+.pm-input-row textarea{flex:1;padding:7px 10px;border:1px solid #c5b5ec;border-radius:7px;font-family:inherit;font-size:13px;color:var(--text);resize:vertical;min-height:52px;background:#fdfbff;}
+.pm-input-row textarea:focus{outline:none;border-color:var(--purple-mid);}
+.btn-pm-save{padding:7px 13px;background:var(--purple-mid);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-pm-save:hover{background:var(--purple);}
+
+/* ── CALLRAIL ── */
+.cr-module{background:#fff;border:1px solid #b8d4ee;border-top:4px solid var(--blue);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.cr-header{background:var(--navy);}
+.cr-header-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 22px 14px;}
+.cr-header-left{display:flex;align-items:center;gap:12px;}
+.cr-icon{width:36px;height:36px;background:rgba(26,106,170,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cr-title{font-size:14px;font-weight:700;color:#fff;}
+.cr-subtitle{font-size:11px;color:rgba(255,255,255,.42);margin-top:2px;}
+.cr-link-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(26,106,170,.2);border:1px solid rgba(26,106,170,.5);border-radius:8px;color:#7dc8f8;font-size:12px;font-weight:600;text-decoration:none;transition:background .15s;}
+.cr-link-btn:hover{background:rgba(26,106,170,.35);}
+.cr-tabs{display:flex;background:rgba(0,0,0,.18);overflow-x:auto;}
+.cr-tab{padding:9px 18px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;user-select:none;}
+.cr-tab:hover{color:rgba(255,255,255,.72);}
+.cr-tab.active{color:#fff;border-bottom-color:var(--blue);}
+.cr-body{padding:20px 22px;}
+.cr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.cr-card{border:1px solid var(--gray-border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+.cr-card-header{background:var(--navy2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.cr-src-label{font-size:12px;font-weight:700;color:#fff;letter-spacing:.04em;text-transform:uppercase;}
+.cr-done-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--green-light);color:var(--green);white-space:nowrap;}
+.cr-apps-row{padding:16px 14px 12px;text-align:center;}
+.cr-apps-num{font-size:30px;font-weight:800;line-height:1.1;}
+.cr-apps-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:3px;}
+.cr-stats{display:flex;border-top:1px solid var(--gray-border);border-bottom:1px solid var(--gray-border);}
+.cr-stat{flex:1;padding:10px 6px;text-align:center;border-right:1px solid var(--gray-border);}
+.cr-stat:last-child{border-right:none;}
+.cr-stat-num{font-size:16px;font-weight:700;color:var(--navy);line-height:1.2;}
+.cr-stat-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:2px;line-height:1.3;}
+.cr-notes{padding:12px 14px;font-size:12.5px;color:var(--muted);line-height:1.65;flex:1;}
+.cr-note-callout{background:#fffbf0;border-left:3px solid var(--gold);padding:9px 12px;font-size:12px;color:#6b4e00;line-height:1.55;margin:0 14px 10px;border-radius:0 6px 6px 0;}
+.cr-resolved-bar{display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid #a8d8b8;border-radius:7px;padding:7px 12px;margin:0 14px 10px;font-size:12px;color:var(--green);font-weight:600;flex-wrap:wrap;}
+.cr-resolved-bar button{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;text-decoration:underline;}
+.cr-comment-zone{padding:0 14px 14px;}
+.cr-comment-saved{font-size:12px;color:var(--navy2);background:#f0f4fa;border-left:3px solid var(--navy2);padding:7px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;line-height:1.5;white-space:pre-wrap;}
+
+/* ── CATEGORIES ── */
+.cat-grid{display:grid;gap:14px;}
+.item-row{display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid #f0f2f5;transition:outline .3s;}
+.item-row:last-child{border-bottom:none;}
+.item-row.is-hot{background:#fffaf9;}
+.item-row.is-carry{background:#fffdf5;border-left:3px solid var(--gold);}
+.item-row.is-done{background:#f7fdf9;opacity:.85;}
+.item-bullet{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.item-bullet.hot{background:var(--red);}
+.item-bullet.carry{background:var(--gold);}
+.item-bullet.normal{background:var(--blue);}
+.item-bullet.done{background:var(--green);}
+.item-content{flex:1;min-width:0;}
+.item-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;}
+.tag.action{background:var(--red-light);color:var(--red);}
+.tag.carry-tag{background:#fff8e8;color:#7a5200;border:1px solid #e8cc70;}
+.tag.done-tag{background:var(--green-light);color:var(--green);}
+.item-text{font-size:13.5px;color:var(--text);line-height:1.6;}
+.item-note{background:#fffbf0;border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 7px 7px 0;font-size:12.5px;color:#6b4e00;margin-top:9px;line-height:1.55;}
+.approve-block{background:var(--teal-light);border:1px solid #b0d9d4;border-radius:8px;padding:12px 15px;margin-top:9px;font-size:13px;color:#14504a;line-height:1.65;}
+.approve-label{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;}
+.links-section{margin-top:9px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+.links-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:2px;}
+.link-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;background:#f0f4fa;border:1px solid #c8d4e8;border-radius:20px;font-size:12px;color:var(--navy2);text-decoration:none;font-weight:500;transition:background .15s;}
+.link-chip:hover{background:#dce8f8;}
+.link-chip svg{width:11px;height:11px;opacity:.6;}
+.section-toggle{width:100%;background:#fff;border:1px solid var(--gray-border);border-radius:12px;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s;user-select:none;}
+.section-toggle:hover{background:#f5f7fa;}
+.section-toggle-left{display:flex;align-items:center;gap:10px;}
+.section-toggle-title{font-size:13px;font-weight:700;color:var(--navy);letter-spacing:.02em;}
+.section-toggle-meta{font-size:12px;color:var(--muted);}
+.section-toggle-arrow{font-size:14px;color:var(--muted);transition:transform .25s;}
+.section-toggle-arrow.open{transform:rotate(180deg);}
+.section-content{display:none;}
+.section-content.open{display:block;}
+.section-wrap{margin-bottom:14px;}
+.section-wrap .section-toggle{border-radius:12px;}
+.section-wrap.open .section-toggle{border-radius:12px 12px 0 0;border-bottom:none;}
+.section-wrap.open .section-content{border:1px solid var(--gray-border);border-top:none;border-radius:0 0 12px 12px;background:#fff;}
+.item-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.action-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px dashed var(--gray-border);background:#f8f9fb;color:var(--navy2);}
+.action-btn:hover{background:#eef2f8;border-color:#b0bcd0;}
+.action-btn.danger{color:var(--red);border-color:#f0cbc8;background:#fdf6f6;}
+.action-btn.danger:hover{background:var(--red-light);}
+.client-zone{margin-top:11px;border-top:1px dashed #d0d6e0;padding-top:10px;}
+.client-zone-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.client-zone-label.urgent{color:var(--red);}
+.client-response-display{font-size:13px;color:var(--navy2);background:#f0f4fa;border-left:3px solid var(--navy2);padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:6px;line-height:1.55;white-space:pre-wrap;}
+.client-input-row{display:flex;gap:8px;align-items:flex-start;}
+.client-input-row textarea{flex:1;padding:8px 10px;border:1px solid var(--gray-border);border-radius:7px;font-family:inherit;font-size:13px;color:var(--text);resize:vertical;min-height:56px;background:#fafbfd;}
+.client-input-row textarea:focus{outline:none;border-color:var(--teal);}
+.client-actions{display:flex;flex-direction:column;gap:6px;}
+.btn-submit{padding:8px 14px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-submit:hover{background:var(--navy2);}
+.btn-resolve{padding:7px 12px;background:var(--green-light);color:var(--green);border:1px solid #a8d8b8;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-resolve:hover{background:#d4edda;}
+.resolved-bar{display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid #a8d8b8;border-radius:7px;padding:7px 12px;margin-top:8px;font-size:12px;color:var(--green);font-weight:600;flex-wrap:wrap;}
+.resolved-bar button{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;text-decoration:underline;}
+.empty-row{padding:14px 20px;font-size:13px;color:var(--muted);font-style:italic;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,34,64,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:540px;box-shadow:0 8px 40px rgba(0,0,0,.18);overflow:hidden;}
+.modal-header{background:var(--navy);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h3{font-size:14px;font-weight:700;color:#fff;}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;line-height:1;padding:0 4px;}
+.modal-close:hover{color:#fff;}
+.modal-body{padding:20px 22px;max-height:70vh;overflow-y:auto;}
+.modal-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;}
+.modal-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--gray-border);display:flex;justify-content:flex-end;gap:8px;}
+.btn-modal-cancel{padding:8px 16px;background:#f0f2f5;border:1px solid var(--gray-border);border-radius:7px;font-size:13px;cursor:pointer;color:var(--muted);}
+.btn-modal-save{padding:8px 20px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-modal-save:hover{background:var(--navy2);}
+.link-edit-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;padding:10px 12px;background:#f8f9fb;border:1px solid var(--gray-border);border-radius:8px;}
+.link-edit-fields{display:flex;flex-direction:column;gap:6px;flex:1;}
+.link-edit-fields input{padding:6px 9px;border:1px solid var(--gray-border);border-radius:6px;font-size:13px;font-family:inherit;color:var(--text);}
+.link-edit-fields input.url-input{font-size:12px;color:var(--muted);}
+.link-edit-fields input:focus{outline:none;border-color:var(--teal);}
+.btn-del-link{width:28px;height:28px;border-radius:6px;background:#fdf0ef;border:1px solid #f0cbc8;color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-del-link:hover{background:#fbe0de;}
+.add-link-row{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.add-link-row input{flex:1;min-width:100px;padding:7px 10px;border:1px solid var(--gray-border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text);}
+.add-link-row input:focus{outline:none;border-color:var(--teal);}
+.btn-add-link{padding:7px 14px;background:var(--teal-light);color:var(--teal);border:1px solid #b0d9d4;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-add-link:hover{background:#d0ece8;}
+textarea.edit-item-ta{width:100%;padding:10px 12px;border:1px solid var(--gray-border);border-radius:8px;font-family:inherit;font-size:13px;color:var(--text);resize:vertical;min-height:100px;background:#fafbfd;line-height:1.6;}
+textarea.edit-item-ta:focus{outline:none;border-color:var(--teal);}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.2);z-index:9999;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.error{background:var(--red);}
+.no-report{text-align:center;padding:60px 20px;color:var(--muted);}
+main{max-width:1200px;margin:0 auto;padding:28px 28px 64px;}
+footer{background:var(--navy);padding:22px 32px;text-align:center;}
+footer p{font-size:11px;color:rgba(255,255,255,.4);line-height:1.8;}
+footer a{color:rgba(255,255,255,.5);text-decoration:none;}
+/* ── TABLET: 800px ── */
+@media(max-width:800px){
+  .cr-grid{grid-template-columns:repeat(2,1fr);}
+  .header-inner,.stats-inner,.page-title-inner{max-width:100%;}
+  main{max-width:100%;}
+}
+
+/* ── STACK SUMMARY CARDS on mobile ── */
+@media(max-width:700px){
+  .summary-grid{grid-template-columns:1fr;}
+}
+
+/* ── MOBILE: 700px — header reorg + 2×2 stats ── */
+@media(max-width:700px){
+  /* Header: week nav drops to second row */
+  .header-inner{height:auto;padding:10px 14px;flex-wrap:wrap;gap:6px;}
+  .header-left{flex:1;min-width:0;}
+  .header-right{flex:0 0 auto;}
+  .header-center{order:10;width:100%;justify-content:center;
+    padding:7px 0 3px;border-top:1px solid rgba(255,255,255,.12);margin-top:2px;}
+  .hdr-sep{display:none;}
+  .btn-hdr{display:none;}
+  .brand-name{font-size:14px;}
+  .brand-sub{display:none;}
+  .logo-mark{width:36px;height:36px;}
+  .week-info{min-width:160px;}
+
+  /* Page title */
+  .page-title{padding:14px 14px 12px;}
+  .page-title-inner{max-width:100%;}
+  .pt-h1{font-size:20px;margin-bottom:8px;}
+  .pt-badge{font-size:11px;padding:4px 12px;}
+
+  /* Stats: 2×2 */
+  .stats-inner{flex-wrap:wrap;max-width:100%;}
+  .stat-block{flex:0 0 50%;border-right:none;border-bottom:1px solid var(--gray-border);padding:12px 18px;}
+  .stat-block:nth-child(odd){border-right:1px solid var(--gray-border);}
+  .stat-block:nth-child(3),.stat-block:nth-child(4){border-bottom:none;}
+  .stat-big{font-size:26px;}
+
+  /* Main layout */
+  main{padding:16px 14px 48px;}
+  .summary-grid{gap:10px;margin-bottom:16px;}
+
+  /* Summary cards */
+  .sum-card-hdr{padding:10px 14px;}
+  .sum-item{padding:8px 14px;}
+  .intel-item{padding:9px 14px;}
+
+  /* Collapsible sections */
+  .section-toggle{padding:11px 14px;}
+  .section-toggle-meta{font-size:11px;}
+  .item-row{padding:12px 14px;gap:10px;}
+  .approve-block,.item-note{padding:8px 10px;}
+  .empty-row{padding:12px 14px;}
+
+  /* Paid media & CallRail */
+  .pm-header-top,.pm-dash-links,.pm-body{padding-left:14px;padding-right:14px;}
+  .cr-header-top,.cr-body{padding-left:14px;padding-right:14px;}
+  .cr-grid{grid-template-columns:1fr;}
+
+  /* Forms */
+  .client-input-row,.pm-input-row{flex-direction:column;}
+  .client-actions{flex-direction:row;}
+
+  /* Footer */
+  footer{padding:16px 14px;}
+}
+
+/* ── SMALL MOBILE: 480px ── */
+@media(max-width:480px){
+  .brand-name{font-size:12px;letter-spacing:.05em;}
+  .btn-new{padding:7px 11px;font-size:11px;gap:4px;}
+  .week-nav-btn{width:28px;height:28px;font-size:14px;}
+  .week-info .wd{font-size:13px;}
+  .pt-h1{font-size:17px;}
+  .stat-big{font-size:22px;}
+  .stat-lbl{font-size:8px;letter-spacing:.07em;}
+  .stat-block{padding:10px 14px;}
+  .section-toggle-title{font-size:12px;}
+  .item-text{font-size:13px;}
+  .item-bullet{width:7px;height:7px;margin-top:5px;}
+  .pm-list>li{font-size:13px;}
+  .pm-dash-btn{font-size:11px;padding:6px 10px;}
+  .pm-tab,.cr-tab{padding:8px 12px;font-size:11px;}
+  .sum-card-title{font-size:10px;letter-spacing:.06em;}
+  .sum-badge{width:19px;height:19px;font-size:10px;}
+  .sum-go{padding:4px 8px;font-size:9px;}
+  .cr-apps-num{font-size:26px;}
+  .cr-stat-num{font-size:14px;}
+  .cr-stat-lbl{font-size:8px;}
+  .tag{font-size:9px;}
+  .intel-cat{font-size:8px;}
+  .intel-text{font-size:12px;}
+  .action-btn{font-size:10px;padding:4px 9px;}
+}
+
+/* ── LOGIN ────────────────────────────────────────────────── */
+#login-screen{position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(ellipse 80% 50% at 50% -10%,#1a3a6a88,transparent);}
+.login-card{background:#fff;border-radius:16px;width:380px;max-width:92vw;box-shadow:0 40px 100px rgba(0,0,0,.5);overflow:hidden;}
+.login-hdr{background:var(--navy);padding:30px 30px 26px;text-align:center;border-bottom:3px solid var(--teal);}
+.login-hdr .lh-badge{display:inline-block;background:var(--teal);color:#fff;border-radius:6px;padding:3px 12px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+.login-hdr h2{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.01em;}
+.login-hdr p{font-size:11px;color:rgba(255,255,255,.4);margin-top:5px;}
+.login-body{padding:26px 28px 30px;}
+.lf-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px;}
+.lf-input{width:100%;padding:10px 13px;border:1.5px solid var(--gray-border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:border-color .15s;box-sizing:border-box;}
+.lf-input:focus{border-color:var(--teal);}
+.lf-pw-wrap{position:relative;}
+.lf-pw-wrap .lf-input{padding-right:40px;}
+.lf-toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:0;}
+.lf-err{background:var(--red-light);border:1px solid #f0cbc8;border-radius:7px;padding:9px 13px;font-size:13px;color:var(--red);margin-bottom:14px;}
+.btn-login{width:100%;padding:12px 0;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;}
+.btn-login:hover{background:var(--navy2);}
+.btn-login:disabled{opacity:.4;cursor:default;}
+
+/* ── ADMIN NAV BAR ─────────────────────────────────────────── */
+#admin-nav-bar{background:#111827;border-bottom:2px solid var(--teal);padding:0 28px;display:flex;align-items:center;gap:10px;height:46px;position:sticky;top:0;z-index:300;}
+.anb-label{color:rgba(255,255,255,.35);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-right:6px;white-space:nowrap;}
+.anb-btn{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.anb-btn:hover{color:#fff;border-color:rgba(255,255,255,.35);}
+.anb-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.anb-sep{width:1px;height:22px;background:rgba(255,255,255,.12);margin:0 4px;}
+.anb-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.anb-user{font-size:11px;color:rgba(255,255,255,.35);}
+.btn-anb-logout{padding:5px 13px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;font-family:inherit;}
+.btn-anb-logout:hover{background:rgba(255,255,255,.08);color:#fff;}
+
+/* ── INTAKE FORM ───────────────────────────────────────────── */
+#intake-view{background:var(--gray-bg);min-height:calc(100vh - 46px);}
+.intake-top{background:#fff;border-bottom:1px solid var(--gray-border);padding:20px 28px;}
+.intake-top-inner{max-width:880px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.intake-eyebrow{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.intake-h1{font-size:22px;font-weight:800;color:var(--navy);}
+.intake-week-nav{display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid var(--gray-border);border-radius:10px;padding:6px 8px;}
+.iwn-btn{background:rgba(10,34,64,.07);border:1px solid var(--gray-border);color:var(--navy);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
+.iwn-btn:hover:not(:disabled){background:rgba(10,34,64,.14);}
+.iwn-btn:disabled{opacity:.3;cursor:default;}
+.iwn-center{text-align:center;min-width:172px;}
+.iwn-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.iwn-week{font-size:14px;font-weight:700;color:var(--navy);margin-top:1px;}
+.iwn-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;margin-top:3px;letter-spacing:.04em;}
+.iwn-badge.existing{background:var(--teal-light);color:var(--teal);}
+.iwn-badge.new-week{background:#fff3cd;color:#8a6000;border:1px solid #f0d898;}
+.intake-body{max-width:880px;margin:0 auto;padding:22px 28px 100px;}
+.intake-sec{background:#fff;border:1px solid var(--gray-border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.intake-sec-hdr{background:var(--navy2);padding:11px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.intake-sec-title{color:#fff;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
+.intake-sec-body{padding:18px;}
+.if-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:7px;}
+.if-ta{width:100%;padding:10px 13px;border:1.5px solid var(--gray-border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;min-height:100px;line-height:1.7;outline:none;box-sizing:border-box;}
+.if-ta:focus{border-color:var(--teal);}
+.if-checks{display:flex;gap:18px;margin:12px 0;}
+.if-check{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer;}
+.if-check input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer;}
+.if-link-row{display:grid;grid-template-columns:1fr 2fr 30px;gap:8px;margin-bottom:8px;align-items:center;}
+.if-link-in{padding:7px 10px;border:1.5px solid var(--gray-border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text);outline:none;box-sizing:border-box;}
+.if-link-in:focus{border-color:var(--teal);}
+.if-pm-note{background:var(--purple-light);border-left:3px solid var(--purple-mid);border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#3a1f70;line-height:1.6;}
+.intake-sticky-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--gray-border);padding:12px 28px;display:flex;align-items:center;gap:10px;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,.07);}
+.intake-sticky-bar .status-text{font-size:12px;color:var(--muted);margin-right:auto;}
+.btn-publish{padding:10px 24px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.btn-publish:hover{background:#135f55;}
+.btn-save-draft{padding:10px 18px;background:#fff;color:var(--navy2);border:1px solid var(--gray-border);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-save-draft:hover{background:var(--gray-bg);}
+.btn-clr{padding:10px 14px;background:transparent;color:var(--red);border:1px solid #f0cbc8;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;}
+.if-has-content .intake-sec-hdr{background:#0d5247;}
+.if-has-content .intake-sec-title::after{content:' ✓';opacity:.7;}
+
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-hdr">
+      <div style="display:flex;align-items:center;justify-content:center;gap:13px;margin-bottom:16px;">
+        <svg viewBox="0 0 217 235" style="height:46px;width:auto;flex-shrink:0" xmlns="http://www.w3.org/2000/svg">
+          <path d="M150.7 0c37.6 20.2 63.1 59.9 63.1 105.5 0 66.1-53.6 119.8-119.8 119.8-11.8 0-23.1-1.7-33.9-4.9 16.9 9.1 36.2 14.2 56.6 14.2 66.1 0 119.8-53.6 119.8-119.8.1-54.3-36.1-100.2-85.8-114.8z" fill="#32b9b4"/>
+          <path d="M174.5 79.4c8.6 32.3-.3 68.2-26.4 92.7-37.8 35.5-97.2 33.7-132.7-4.1C9.1 161.3 4 153.9 0 146.1c3.9 14.5 11.3 28.3 22.3 40 35.5 37.8 94.9 39.6 132.7 4.1 31-29.2 37.8-74.6 19.5-110.8z" fill="#98dcd9"/>
+          <path d="M51.2 177.4c-25.1-22.1-37.5-57-29.3-91.8 11.8-50.5 62.3-81.8 112.8-70 9 2.1 17.3 5.5 25 9.8-11.3-9.9-25-17.3-40.7-21C68.4-7.4 17.9 23.9 6.1 74.4c-9.7 41.5 9.8 83 45.1 103z" fill="#65cac7"/>
+        </svg>
+        <div style="text-align:left;">
+          <div style="color:#fff;font-size:17px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;line-height:1.1;">SPECTRUM</div>
+          <div style="color:rgba(255,255,255,.5);font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-top:3px;">VISION PARTNERS</div>
+        </div>
+      </div>
+      <div style="width:40px;height:1px;background:rgba(255,255,255,.15);margin:0 auto 16px;"></div>
+      <h2>Weekly Hub</h2>
+      <p>Sign in to access your portal</p>
+    </div>
+    <div class="login-body">
+      <div style="margin-bottom:16px;">
+        <label class="lf-label" for="lf-username">Username</label>
+        <input class="lf-input" id="lf-username" type="text" placeholder="Enter username" autocomplete="username" />
+      </div>
+      <div style="margin-bottom:20px;">
+        <label class="lf-label" for="lf-password">Password</label>
+        <div class="lf-pw-wrap">
+          <input class="lf-input" id="lf-password" type="password" placeholder="Enter password" autocomplete="current-password" />
+          <button class="lf-toggle-pw" onclick="togglePw()" id="pw-toggle-btn" type="button">👁</button>
+        </div>
+      </div>
+      <div class="lf-err" id="lf-err" style="display:none;"></div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()" disabled>Sign In →</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+
+  <!-- ADMIN NAV BAR (hidden for client) -->
+  <div id="admin-nav-bar" style="display:none">
+    <span class="anb-label">Admin Portal</span>
+    <div class="anb-sep"></div>
+    <button class="anb-btn active" data-mode="hub" onclick="setAdminMode('hub')">📊 Client Hub</button>
+    <button class="anb-btn" data-mode="intake" onclick="setAdminMode('intake')">📋 Intake Form</button>
+    <div class="anb-right">
+      <span class="anb-user" id="anb-user-label"></span>
+      <button class="btn-anb-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- HUB VIEW -->
+  <div id="hub-view">
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="edit-text-modal" style="display:none;" onclick="if(event.target===this)closeTextModal()">
+  <div class="modal"><div class="modal-header"><h3>Edit Update</h3><button class="modal-close" onclick="closeTextModal()">&#10005;</button></div>
+  <div class="modal-body"><div class="modal-section-label">Update text</div><textarea class="edit-item-ta" id="edit-item-ta" rows="5"></textarea><p class="modal-note">Tip: use &lt;strong&gt;text&lt;/strong&gt; for bold.</p></div>
+  <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeTextModal()">Cancel</button><button class="btn-modal-save" onclick="saveTextModal()">Save changes</button></div></div>
+</div>
+<div class="modal-backdrop" id="link-modal" style="display:none;" onclick="if(event.target===this)closeLinkModal()">
+  <div class="modal"><div class="modal-header"><h3>Edit Links</h3><button class="modal-close" onclick="closeLinkModal()">&#10005;</button></div>
+  <div class="modal-body"><div class="modal-section-label">Current links</div><div id="modal-link-list"></div>
+  <div class="modal-section-label" style="margin-top:18px;">Add a new link</div>
+  <div class="add-link-row"><input id="new-link-label" placeholder="Label"/><input id="new-link-url" placeholder="https://…"/><button class="btn-add-link" onclick="modalAddLink()">+ Add</button></div></div>
+  <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeLinkModal()">Cancel</button><button class="btn-modal-save" onclick="saveLinkModal()">Save changes</button></div></div>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="logo-mark"><svg viewBox="0 0 217 235" style="height:40px;width:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+          <path d="M150.7 0c37.6 20.2 63.1 59.9 63.1 105.5 0 66.1-53.6 119.8-119.8 119.8-11.8 0-23.1-1.7-33.9-4.9 16.9 9.1 36.2 14.2 56.6 14.2 66.1 0 119.8-53.6 119.8-119.8.1-54.3-36.1-100.2-85.8-114.8z" fill="#32b9b4"/>
+          <path d="M174.5 79.4c8.6 32.3-.3 68.2-26.4 92.7-37.8 35.5-97.2 33.7-132.7-4.1C9.1 161.3 4 153.9 0 146.1c3.9 14.5 11.3 28.3 22.3 40 35.5 37.8 94.9 39.6 132.7 4.1 31-29.2 37.8-74.6 19.5-110.8z" fill="#98dcd9"/>
+          <path d="M51.2 177.4c-25.1-22.1-37.5-57-29.3-91.8 11.8-50.5 62.3-81.8 112.8-70 9 2.1 17.3 5.5 25 9.8-11.3-9.9-25-17.3-40.7-21C68.4-7.4 17.9 23.9 6.1 74.4c-9.7 41.5 9.8 83 45.1 103z" fill="#65cac7"/>
+        </svg></div>
+      <div><div class="brand-name">SPECTRUM</div><div class="brand-sub">VISION PARTNERS</div></div>
+    </div>
+    <div class="header-center">
+      <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
+      <div class="week-info"><div class="wl">Week of</div><div class="wd" id="week-display"></div></div>
+      <button class="week-nav-btn" onclick="changeWeek(1)">&#8594;</button>
+    </div>
+    <div class="hdr-sep"></div>
+    <div class="header-right">
+      <button class="btn-new admin-only-elem" onclick="showToast('Use the Intake Form in admin mode to add new items.')">&#43; New Item</button>
+      <button class="btn-hdr" onclick="render()">&#8635; Refresh</button>
+      <button class="btn-hdr" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+</header>
+
+<div class="page-title">
+  <div class="page-title-inner">
+    <div class="pt-eyebrow">Prepared for Nancy Fairbrother &mdash; Chief Growth Officer</div>
+    <div class="pt-h1">Marketing Weekly Highlights</div>
+    <div class="pt-badge" id="pt-week-badge">&#128197; Week of &mdash;</div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-block">
+      <div class="stat-num-row"><span class="stat-big" id="stat-carry" style="color:var(--gold)">0</span><span class="stat-arr">→</span></div>
+      <div class="stat-lbl">Carried Over</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num-row"><span class="stat-big" id="stat-hot" style="color:var(--red)">0</span><span class="stat-arr">→</span></div>
+      <div class="stat-lbl">Action Items</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num-row"><span class="stat-big" id="stat-done" style="color:var(--green)">0</span><span class="stat-arr">→</span></div>
+      <div class="stat-lbl">Resolved This Week</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num-row"><span class="stat-big" id="stat-total" style="color:var(--navy)">0</span><span class="stat-arr">→</span></div>
+      <div class="stat-lbl">Total Updates</div>
+    </div>
+  </div>
+</div>
+
+<main id="main-content"></main>
+
+<footer>
+  <p><strong style="color:rgba(255,255,255,.7)">Spectrum Vision Partners</strong><br>
+  825 East Gate Boulevard, Garden City, NY 11530 &nbsp;·&nbsp; <a href="tel:15168045200">(516) 804-5200</a><br>
+  <a href="https://www.spectrumvisionpartners.com">spectrumvisionpartners.com</a> &nbsp;·&nbsp; Confidential — Internal Marketing Report</p>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  FIREBASE CONFIG — paste your values from Firebase Console here
+// ═══════════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+  authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+  projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+  storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId:             "REPLACE_WITH_YOUR_APP_ID",
+};
+// ═══════════════════════════════════════════════════════════════
+
+let _db  = null;
+let _doc = null;
+let _fbReady = false;
+
+function initFirebase() {
+  try {
+    if (FIREBASE_CONFIG.apiKey === 'REPLACE_WITH_YOUR_API_KEY') {
+      console.warn('SVP Hub: Firebase not configured — using localStorage fallback. See deployment guide.');
+      return;
+    }
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _db  = firebase.firestore();
+    _doc = _db.collection('svplens').doc('publishedItems');
+    _fbReady = true;
+
+    // Real-time listener: any published update appears instantly on client
+    _doc.onSnapshot(snap => {
+      if (!snap.exists) return;
+      const data = snap.data();
+      // Cache locally as backup
+      try { localStorage.setItem(WEEKS_EXTRA_KEY, JSON.stringify(data)); } catch(e) {}
+      // Re-render hub if user is already logged in
+      if (currentUser) { mergeExtraItems(); render(); }
+    }, err => console.error('Firestore snapshot error:', err));
+
+    console.log('SVP Hub: Firebase connected ✓');
+  } catch(e) {
+    console.error('SVP Hub: Firebase init failed:', e);
+  }
+}
+
+async function pushExtraItemsToFirebase(data) {
+  // Always save locally first (instant, no network needed)
+  try { localStorage.setItem(WEEKS_EXTRA_KEY, JSON.stringify(data)); } catch(e) {}
+  // Then push to Firebase so client sees it
+  if (_fbReady && _doc) {
+    try {
+      await _doc.set(data);
+      return true;
+    } catch(e) {
+      console.error('Firebase write error:', e);
+      return false;
+    }
+  }
+  return false;
+}
+
+async function loadExtraItemsFromFirebase() {
+  if (_fbReady && _doc) {
+    try {
+      const snap = await _doc.get();
+      if (snap.exists) {
+        const data = snap.data();
+        try { localStorage.setItem(WEEKS_EXTRA_KEY, JSON.stringify(data)); } catch(e) {}
+        return data;
+      }
+    } catch(e) { console.error('Firebase read error:', e); }
+  }
+  // Fallback: localStorage
+  try { return JSON.parse(localStorage.getItem(WEEKS_EXTRA_KEY)) || {}; } catch(e) { return {}; }
+}
+
+const EJS_PUBLIC_KEY='YOUR_PUBLIC_KEY',EJS_SERVICE_ID='YOUR_SERVICE_ID',EJS_TEMPLATE_ID='YOUR_TEMPLATE_ID';
+(function(){try{emailjs.init(EJS_PUBLIC_KEY);}catch(e){}})();
+async function sendNotification(p){if(EJS_PUBLIC_KEY==='YOUR_PUBLIC_KEY')return;try{await emailjs.send(EJS_SERVICE_ID,EJS_TEMPLATE_ID,{to_email_1:'christineh@mdgsolutions.com',to_email_2:'davidf@mdgsolutions.com',from_name:'Nancy Fairbrother',week:p.week,section:p.section,item:p.item,message:p.message,action_type:p.action_type});}catch(e){console.warn(e);}}
+function showToast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' error':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+const STORE_KEY='svp_lens_v10';
+const DASH_OCLI='https://platform.datorama.com/external/dashboard?embedpage=2e3b1bfb-282d-46ee-ad14-c95ccc98c5b7';
+const DASH_LASIK='https://platform.datorama.com/external/dashboard?embedpage=906bdb3a-8426-4777-8e39-1d9140e9be25';
+function loadStore(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{};}catch(e){return{};}}
+function saveStore(s){localStorage.setItem(STORE_KEY,JSON.stringify(s));}
+function getMondayOf(ds){const p=ds.split('-');const dt=new Date(+p[0],+p[1]-1,+p[2]);const day=dt.getDay();dt.setDate(dt.getDate()+(day===0?-6:1-day));return dt;}
+function weekKey(mon){const y=mon.getFullYear(),m=String(mon.getMonth()+1).padStart(2,'0'),d=String(mon.getDate()).padStart(2,'0');return`week_${y}-${m}-${d}`;}
+function weekLabel(mon){const fri=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+4);const fmt=d=>`${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;return`${fmt(mon)} – ${fmt(fri)}`;}
+function addWeeks(mon,n){return new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+n*7);}
+
+const EXT=`<svg viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 1h3m0 0v3m0-3L5.5 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CHART=`<svg viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="3" height="6" rx="1" fill="currentColor" opacity=".7"/><rect x="6" y="5" width="3" height="10" rx="1" fill="currentColor"/><rect x="11" y="1" width="3" height="14" rx="1" fill="currentColor" opacity=".7"/></svg>`;
+
+// ── PAID MEDIA ────────────────────────────────────────────────────────────────
+const PM={
+  'week_2026-03-02':{dateRange:'3/2 – 3/6',intro:'Paid media insights for the week of 3/2–3/6, covering both Organic (OCLI) and Refractive (LBOV). Dashboard links below.',
+    ocli:[
+      {id:'pm_oc1',text:'Dr. Krulewski\'s call extension was disapproved in Google, which impacted call volume and overall CPL. MDG will rectify this by implementing a new call rail extension.',rec:'<strong>Action:</strong> New call rail extension to be implemented this week.'},
+      {id:'pm_oc2',text:'All campaigns spent the week in learning mode besides Dr. Nataneli\'s provider campaign.'},
+      {id:'pm_oc3',text:'The media team will implement Spanish ad copy &amp; creative for Dr. Nataneli\'s campaign per Garnerville market recommendations.'},
+    ],
+    lasik:[
+      {id:'pm_lv1',text:'<strong>3 new patient bookings</strong> last week:',sub:['2 for Garden City (Google)','1 for CT (Google)']},
+      {id:'pm_lv2',text:'1 additional new patient booking for East Hanover (Google). <strong>4 total New Patient bookings MTD.</strong>'},
+      {id:'pm_lv3',text:'Significant increase in NP bookings MoM, particularly for Garden City.'},
+      {id:'pm_lv4',text:'The team will continue to monitor performance and make any necessary shifts in budget allocations.'},
+      {id:'pm_lv5',text:'<strong>Reminder:</strong> April budgets pending — 3/15 preferred date.',note:'April budget deadline: March 15th.'},
+    ]
+  },
+  'week_2026-03-23':{dateRange:'3/23 – 3/28',intro:'Paid media highlights for the week of 3/23–3/28, covering both Organic (OCLI) and Refractive (LBOV). Dashboard links below.',
+    ocli:[
+      {id:'pm_oc_w5_1',text:'<strong>Dr. Krulewski — Radius Targeting Adjustment:</strong> Impression volume trending upward. Conversion rate still below average but improving.'},
+      {id:'pm_oc_w5_2',text:'<strong>Dr. Nataneli — Spanish Ad Group:</strong> Generating impressions with a <strong>14% CTR</strong>, above average.'},
+      {id:'pm_oc_w5_3',text:'<strong>281 Total Leads MTD:</strong>',sub:['101 form captures (Meta &amp; Google)','180 calls — click-to-call or 90s+ connected']},
+      {id:'pm_oc_w5_4',text:'<strong>PPC Call Lead Qualification Under Review.</strong> MDG is optimizing how phone call leads are counted. Further info to follow.'},
+    ],
+    lasik:[
+      {id:'pm_lv_w5_1',text:'<strong>4 New Patient Bookings last week:</strong>',sub:['2 for Performance Max (Google)','1 for Garden City (Google)','1 for Garden City (Meta)']},
+      {id:'pm_lv_w5_2',text:'<strong>1 Existing Patient Booking last week:</strong>',sub:['1 for Performance Max (Google)']},
+      {id:'pm_lv_w5_3',text:'<strong>13 New Patient Bookings MTD</strong> — up from 7 in February. <strong>19 total patient bookings</strong> for March — strongest month to date.'},
+      {id:'pm_lv_w5_4',text:'<strong>5 New Leads and 2 Existing Leads classified as "Not Booked"</strong> — form submissions via Promptly not yet followed up.',note:'<strong>Action needed:</strong> 7 leads uncontacted via Promptly. Confirm Dr. Bafna (Monroeville) operational follow-up for April webhook.'},
+    ]
+  },
+  'week_2026-03-30':{dateRange:'3/30 – 4/3',intro:'March 2026 paid media recap plus early April campaign performance for both Organic (OCLI) and Refractive (LBOV). April campaigns launched 4/1 and are currently in learning. Dashboard links below.',
+    ocli:[
+      {id:'pm_oc_w6_1',text:'<strong>March 2026 Total Leads — ~314:</strong>',sub:['115 form captures','199 phone call leads']},
+      {id:'pm_oc_w6_2',text:'<strong>Dr. Krulewski — Meta Campaign Paused:</strong> Paused due to negative comments on the paid social ad. The remaining budget (~$100) was shifted to <strong>Dr. Nataneli\'s Google Search campaign</strong>, which has the most efficient CPL and highest conversion rate.'},
+      {id:'pm_oc_w6_3',text:'<strong>Mechanicsburg Clinic Campaign Launched:</strong> Dr. Krulewski\'s provider campaigns closed March with the highest CPL. In lieu of a provider campaign, a new campaign for the <strong>Mechanicsburg clinic location</strong> has been implemented to increase bookings for high-value medical care services. Dr. Krulewski will continue to appear as a sitelink in Google.'},
+      {id:'pm_oc_w6_4',text:'<strong>Spanish Creative Assets — Dr. Nataneli:</strong> MDG implemented Spanish creative in both Google and Meta. Dr. Nataneli is the <strong>only provider campaign continuing into April</strong>, with focus on the Garnerville clinic location.'},
+      {id:'pm_oc_w6_5',text:'<strong>April Campaigns Launched 4/1 — In Learning:</strong> All April budgets and campaigns went live on Wednesday, 4/1. The team is monitoring as the learning phase completes.'},
+      {id:'pm_oc_w6_6',text:'<strong>Philadelphia — Top Performing Location Early April:</strong> Philadelphia is the best performing location in Google so far with <strong>14 leads at a $26 CPL</strong>. Still too early to make budget shifts.',note:'Monitor Philadelphia closely before reallocating budget as the learning phase completes.'},
+      {id:'pm_oc_w6_7',text:'<strong>CallRail Integration into Google Ads — New:</strong> MDG successfully integrated CallRail into Google Ads late last week with the goal of improving phone call lead quality. New curated landing pages will also be incorporated this week.',rec:'<strong>Action:</strong> The team will monitor the CallRail + landing page integration closely and make adjustments as needed throughout the testing period.'},
+    ],
+    lasik:[
+      {id:'pm_lv_w6_1',text:'<strong>March 2026 — Strongest LASIK Month to Date:</strong> Significant improvement with LASIK campaigns, particularly in Google, generating the highest patient bookings on record.',sub:['16 Liine Qualified Leads','13 Liine New Patient Bookings','7 Liine Existing Patient Bookings']},
+      {id:'pm_lv_w6_2',text:'<strong>March New Patient Booking Breakdown:</strong>',sub:['1 Garden City — Meta','6 Performance Max — Google','3 Garden City — Google (note: 2 bookings not yet reflecting in dashboard but confirmed in Google)','1 East Hanover — Google','2 CT — Google']},
+      {id:'pm_lv_w6_3',text:'<strong>March Existing Patient Booking Breakdown:</strong>',sub:['1 Garden City — Meta','4 Performance Max — Google','1 Garden City — Google','1 East Hanover — Google']},
+      {id:'pm_lv_w6_4',text:'<strong>Performance Max — High CPL, Highest Bookings:</strong> While Performance Max had a higher-than-average CPL, it generated the most patient bookings of all campaigns. The campaign is optimized for higher-value conversion events beyond just lead volume, which supports overall booking growth.'},
+      {id:'pm_lv_w6_5',text:'<strong>April Budget Allocations:</strong> All budgets were set based on overall March performance, with the goal of continuing to scale momentum for patient bookings.'},
+      {id:'pm_lv_w6_6',text:'<strong>Monroeville Launched 4/1 — In Learning:</strong> The campaign has not yet generated a lead in Google. <strong>1 lead recorded for Meta.</strong> Focus is on building awareness for this location, as there has been no paid media presence in PA since Dr. Kinariwala.',note:'Performance will continue to be monitored. Awareness-building is the primary objective at this stage.'},
+      {id:'pm_lv_w6_7',text:'<strong>Previous Week — 4 Total Bookings (all Google):</strong>',sub:['2 New Patient Bookings','2 Existing Patient Bookings']},
+      {id:'pm_lv_w6_8',text:'<strong>Garden City</strong> continues to be the clinic location with the highest patient bookings, consistent with the budgeted cases for this location.'},
+    ]
+  }
+};
+
+// ── CALLRAIL ──────────────────────────────────────────────────────────────────
+const CALLRAIL={
+  'week_2026-03-16':{dateRange:'3/14 – 3/20',linkLabel:'CallRail QA Check Running.xlsx',linkUrl:'#',
+    sources:[
+      {id:'cr_316_ppc',name:'PPC',appsMade:'0/17',totalCalls:17,underOneMin:5,abandoned:0,notes:'0/17 apps made. Call center phone issues — patients receiving calls when not due. 10 quick hang-ups recorded.',noteCallout:'Call center phone issues identified — patients receiving appointment calls incorrectly. Under investigation.'},
+      {id:'cr_316_out',name:'Outreach Materials',appsMade:'6/10',totalCalls:187,underOneMin:37,abandoned:7,notes:'6/10 apps made. Steady week for outreach.'},
+      {id:'cr_316_web',name:'Website',appsMade:'4/10',totalCalls:659,underOneMin:144,abandoned:41,notes:'4/10 apps made. Usual mix of inquiries in the other 6 calls.'}
+    ]
+  },
+  'week_2026-03-23':{dateRange:'3/21 – 3/27',linkLabel:'CallRail QA Check Running.xlsx',linkUrl:'#',
+    sources:[
+      {id:'cr_323_ppc',name:'PPC',appsMade:'0/23',totalCalls:23,underOneMin:10,abandoned:2,notes:'0/23 apps made. 3 elected for callbacks, 3 calls for changing appointment times, 2 billing-related issues.',noteCallout:'PPC call performance critically low — 0/23 appointments made, now a multi-week trend. Escalated to media team for review.'},
+      {id:'cr_323_out',name:'Outreach Materials',appsMade:'10/10',totalCalls:225,underOneMin:37,abandoned:7,notes:'10/10 apps made. Calls up 45 from last week. Strong week across the board.'},
+      {id:'cr_323_web',name:'Website',appsMade:'8/10',totalCalls:581,underOneMin:122,abandoned:39,notes:'Healthy week — 8/10 apps made. One normal FAQ call; call center rep disconnected on one other.'}
+    ]
+  },
+  'week_2026-03-30':{dateRange:'3/28 – 4/3',linkLabel:'CallRail QA Check Running.xlsx',linkUrl:'#',
+    sources:[
+      {id:'cr_330_ppc',name:'PPC',appsMade:'6/10',totalCalls:44,underOneMin:19,abandoned:2,notes:'6/10 apps made (one 2-for-1). 2 short holds and hang-ups, another call with questions about appointment times. Ads more effective this week — a notable recovery from prior weeks.'},
+      {id:'cr_330_out',name:'Outreach Materials',appsMade:'9/10',totalCalls:231,underOneMin:39,abandoned:6,notes:'9/10 apps made. The one miss was a reschedule. Strong week overall.'},
+      {id:'cr_330_web',name:'Website',appsMade:'6/10',totalCalls:655,underOneMin:149,abandoned:55,notes:'6/10 apps made. Typical week for the website. One unusual instance of a 15-minute hold followed by a hang-up.',noteCallout:'Unusual 15-minute hold and hang-up recorded. If this recurs, call center protocol for extended hold situations should be reviewed.'}
+    ]
+  }
+};
+
+// ── WEEKS ─────────────────────────────────────────────────────────────────────
+const WEEKS={
+  'week_2026-03-02':{label:'3/2/26 – 3/6/26',pmKey:'week_2026-03-02',crKey:null,intelligence:[],
+    categories:[
+      {name:'General',items:[]},
+      {name:'Provider / Location Campaigns',items:[
+        {id:'w2c1',hot:false,text:'<strong>March Campaign — OCLI Vision Location Initiative:</strong> Review and approve updated media plan.',clientPrompt:'Please review and approve.',links:[{label:'Review Media Plan',url:'#'}]},
+        {id:'w2c2',hot:false,text:'<strong>March Campaign — LASIK Google Business Profile Post:</strong> Copy submitted for approval.',approveCaption:'Make a winning move this March! Get 20% off LASIK for a limited time at our Fairfield, Meriden, Garden City, and East Hanover locations.',clientPrompt:'Approved? Any edits needed?',links:[]},
+      ]},
+      {name:'Organic Social Media',items:[{id:'w2o1',hot:true,approval:true,text:'<strong>OCLI Vision April 2026 Creative:</strong> Review and approve latest FIGMA.',clientPrompt:'Please review and approve.',links:[{label:'View FIGMA',url:'#'}]}]},
+      {name:'Blogs & SEO',items:[]},{name:'Web',items:[]},{name:'Meetings',items:[]},{name:'Opportunities',items:[]},{name:'New To Discuss',items:[]},
+    ]
+  },
+  'week_2026-03-09':{label:'3/9/26 – 3/13/26',pmKey:'week_2026-03-02',crKey:null,
+    intelligence:[
+      {cat:'Opportunity',text:'90 unopened LASIK leads identified in Promptly since September 2025 — a significant re-engagement pipeline for Garden City that remains entirely untapped.'},
+      {cat:'Paid Media',text:'April budget approval is on the critical path. Both OCLI and LASIK campaigns require confirmation by the 15th to maintain launch timelines.'},
+      {cat:'Brand',text:'Dr. Stein\'s Tokyo Marathon story is a high-impact human-interest moment. Provider-as-community-member content resonates strongly with ophthalmology audiences.'},
+    ],
+    categories:[
+      {name:'General',items:[
+        {id:'g1',hot:true,text:'<strong>Question:</strong> Do all LASIK locations offer the same (4) services? — Bladeless, PRK, Monovision, Custom',clientPrompt:'Please confirm or clarify.',links:[]},
+        {id:'g2',hot:true,text:'<strong>Promptly (MDProspects) Update:</strong> Identified <strong>90 unopened leads</strong> for Garden City, NY generated from our landing pages since September 2025.',links:[{label:'Un-opened LASIK leads GC - Promptly',url:'https://docs.google.com/spreadsheets/d/11L-0RlKtogYBwH9RcRzrnQFqafkMLmpoJXPc6HPYy5Y/edit?gid=0#gid=0'}]},
+      ]},
+      {name:'Provider / Location Campaigns',items:[
+        {id:'c1',hot:true,text:'April budgets needed by <strong>the 15th</strong> for both Refractive and Organic.',clientPrompt:'Please confirm budget approval.',links:[]},
+        {id:'c2',hot:false,text:'<strong>Update:</strong> April assets in progress.',links:[]},
+      ]},
+      {name:'Organic Social Media',items:[
+        {id:'o1',hot:true,approval:true,text:'<strong>OCLI Vision April Revisions</strong> — approve latest creative.',clientPrompt:'Please review and approve.',links:[{label:'View April Revisions (Figma)',url:'https://www.figma.com/proto/v1kA0RRfyCQzqzn2hG2NLM/SVP-86312-OCLI-March-April-2026-Organic-Social?page-id=15024%3A449&node-id=15024-450'}]},
+        {id:'o2',hot:false,text:'<strong>LBOV May / June 2026 Organic Social</strong> — copy sent for review/feedback.',links:[{label:'Review Copy (Smartsheet)',url:'https://app.smartsheet.com/sheets/5327jqfMg383fRFHHvgJWFJHRp2cM3FxhPQGvCq1?view=grid'}]},
+        {id:'o3',hot:false,text:'<strong>OCLI Vision May / June 2026 Organic Social</strong> — copy sent for review/feedback.',links:[{label:'Review Copy (Smartsheet)',url:'https://app.smartsheet.com/sheets/fCpwgHJgGxX4xxj3Gv3p8HhxcRWp6C5qJ7MG4rC1?view=grid'}]},
+        {id:'o4',hot:true,approval:true,text:'<strong>Dr. Stein Marathon</strong> — Copy submitted for approval.',approveCaption:'Off the clock and hitting the pavement. Congratulations to Dr. Stein on completing the Tokyo Marathon!',clientPrompt:'Approved? Any edits needed?',links:[]},
+      ]},
+      {name:'Blogs & SEO',items:[{id:'b1',hot:true,approval:true,text:'<strong>For approval:</strong> April Blog Replacement — Diabetic Eye Care.',clientPrompt:'Approved? Any revisions?',links:[{label:'View Blog Draft',url:'#'},{label:'Current Blog Page',url:'https://www.ocli.net/blog/'}]}]},
+      {name:'Web',items:[
+        {id:'w1',hot:false,text:'<strong>Hours of Operation Update:</strong> Addressing CT locations first in batches. First batch complete next week.',links:[{label:'CT Locations Page',url:'https://www.ocli.net/locations/'}]},
+        {id:'w2',hot:false,text:'<strong>Cataract Campaign Initiative Update:</strong> Recap sent via email outlining conversations with Liine and Promptly.',links:[]},
+        {id:'w3',hot:false,text:'<strong>Dr. Bafna Scheduling Widget:</strong> Alison working with Allie from NextPatient to fix the scheduling bug.',links:[]},
+      ]},
+      {name:'Meetings',items:[]},{name:'Opportunities',items:[]},{name:'New To Discuss',items:[]},
+    ]
+  },
+  'week_2026-03-16':{label:'3/16/26 – 3/20/26',pmKey:'week_2026-03-02',crKey:'week_2026-03-16',
+    intelligence:[
+      {cat:'Paid Media',text:'Spanish-language targeting for Garnerville gives Dr. Nataneli\'s campaign a first-mover advantage in an underserved demographic. Watch CTR as the leading performance indicator.'},
+      {cat:'Creative',text:'The Werner/Chan provider flyer concept, once approved, is designed to scale to all OCLI providers — a single approval unlocks an entire campaign system.'},
+      {cat:'Content',text:'May/June organic social pipeline submitted this early signals an increasingly proactive content operation.'},
+    ],
+    categories:[
+      {name:'General',items:[]},
+      {name:'Provider / Location Campaigns',items:[
+        {id:'w4c1',hot:true,text:'<strong>Budget for OCLI Vision needed.</strong>',note:'We recommend continuing to include Nataneli — Spanish language support just implemented for Garnerville.',clientPrompt:'Please confirm budget approval.',links:[]},
+        {id:'w4c2',hot:true,approval:true,text:'<strong>April Werner/Chan Flyer</strong> — sent for approval.',clientPrompt:'Approved? Any edits needed?',links:[]},
+        {id:'w4c3',hot:true,approval:true,text:'<strong>New Concept — Other OCLI Providers</strong> — sent for approval. If approved, applies to all other providers.',clientPrompt:'Approved? Any edits needed?',links:[]},
+      ]},
+      {name:'Organic Social Media',items:[
+        {id:'w4o1',hot:true,approval:true,text:'<strong>OCLI Vision April Revisions</strong> — pending approval.',clientPrompt:'Please review and approve.',links:[{label:'View April Revisions (Figma)',url:'https://www.figma.com/proto/v1kA0RRfyCQzqzn2hG2NLM/SVP-86312-OCLI-March-April-2026-Organic-Social?page-id=15024%3A449&node-id=15024-450'}]},
+        {id:'w4o2',hot:true,approval:true,text:'<strong>LBOV May / June 2026 Organic Social</strong> — pending approval.',clientPrompt:'Please review and approve.',links:[{label:'Review Copy (Smartsheet)',url:'https://app.smartsheet.com/sheets/5327jqfMg383fRFHHvgJWFJHRp2cM3FxhPQGvCq1?view=grid'}]},
+        {id:'w4o3',hot:true,approval:true,text:'<strong>OCLI Vision May / June 2026 Organic Social</strong> — pending approval.',clientPrompt:'Please review and approve.',links:[{label:'Review Copy (Smartsheet)',url:'https://app.smartsheet.com/sheets/fCpwgHJgGxX4xxj3Gv3p8HhxcRWp6C5qJ7MG4rC1?view=grid'}]},
+      ]},
+      {name:'Blogs & SEO',items:[]},{name:'Web',items:[]},{name:'Meetings',items:[]},{name:'Opportunities',items:[]},{name:'New To Discuss',items:[]},
+    ]
+  },
+  'week_2026-03-23':{label:'3/23/26 – 3/28/26',pmKey:'week_2026-03-23',crKey:'week_2026-03-23',
+    intelligence:[
+      {cat:'Performance',text:'March is the strongest LASIK booking month on record. 19 total patient bookings vs. 7 in February — an 86% MoM increase — directly validating the Garden City priority and paid media strategy shift.'},
+      {cat:'Operations',text:'Recurring uncontacted Promptly leads (7 this week, 90+ cumulative since Sept 2025) point to a systemic follow-up gap. Formalizing a response protocol before the April webhook launch is now critical path.'},
+      {cat:'Opportunity',text:'Cataract Campaign Phase 1 alignment with Jerry Kapatos is a strategic unlock. There is currently zero paid support behind this patient acquisition vertical.'},
+      {cat:'Audience',text:'Outreach Materials conversion (10/10 this week) consistently outpaces PPC — warm audiences are significantly more receptive than cold paid traffic across all measured periods.'},
+    ],
+    categories:[
+      {name:'General',items:[]},
+      {name:'Provider / Location Campaigns',items:[
+        {id:'w5c1',hot:false,text:'<strong>April Media Launches:</strong> Both the OCLI Location Initiative and LASIK campaigns set to go live on <strong>April 1</strong>.',links:[]},
+        {id:'w5c2',hot:true,text:'<strong>Promptly Webhook — Dr. Bafna (Monroeville):</strong> New webhook established launching April. Please confirm SVP team lead for follow-up.',clientPrompt:'Please confirm who on your team will handle follow-up for Dr. Bafna\'s Promptly leads.',links:[]},
+      ]},
+      {name:'Organic Social Media',items:[
+        {id:'w5o1',hot:true,approval:true,text:'<strong>LBOV May / June 2026 Organic Social</strong> — copy submitted for review and approval.',clientPrompt:'Please review and approve.',links:[{label:'Review Copy (Smartsheet)',url:'https://app.smartsheet.com/sheets/5327jqfMg383fRFHHvgJWFJHRp2cM3FxhPQGvCq1?view=grid'}]},
+        {id:'w5o2',hot:true,approval:true,text:'<strong>OCLI Vision May / June 2026 Organic Social</strong> — copy submitted for review and approval.',clientPrompt:'Please review and approve.',links:[{label:'Review Copy (Smartsheet)',url:'https://app.smartsheet.com/sheets/fCpwgHJgGxX4xxj3Gv3p8HhxcRWp6C5qJ7MG4rC1?view=grid'}]},
+      ]},
+      {name:'Blogs & SEO',items:[]},
+      {name:'Web',items:[
+        {id:'w5w1',hot:true,text:'<strong>Cataract Campaign Initiative — Phase 1:</strong> Requesting 30-minute call with Jerry Kapatos and Nancy. Targeting <strong>Thursday or Friday next week</strong>.',clientPrompt:'Please confirm availability with Jerry for a 30-minute call Thursday or Friday.',links:[]},
+        {id:'w5w2',hot:false,text:'<strong>New LASIK Landing Page Concepts:</strong> Enhanced landing page optimizations in progress — aiming for a <strong>May launch</strong>.',links:[]},
+      ]},
+      {name:'Meetings',items:[]},{name:'Opportunities',items:[]},{name:'New To Discuss',items:[]},
+    ]
+  },
+  'week_2026-03-30':{label:'3/30/26 – 4/3/26',pmKey:'week_2026-03-30',crKey:'week_2026-03-30',
+    intelligence:[
+      {cat:'Recovery',text:'PPC call appointments recovered from 0/23 to 6/10 in two weeks — radius targeting adjustment and creative updates are working. A third consecutive strong week would confirm this as a sustained trend.'},
+      {cat:'Paid Media',text:'April campaigns launched on schedule and in learning. This is the first full month of the new location initiative — March benchmarks are the baseline to beat.'},
+      {cat:'Integration',text:'The CallRail + Google Ads integration is a meaningful optimization lever. Combined with new landing pages this week, it should improve the quality of phone call leads attributed to paid campaigns.'},
+      {cat:'Operations',text:'The website 15-minute hold and hang-up is an outlier. If it recurs, it signals a call center capacity or training issue that should be addressed proactively.'},
+      {cat:'Audience',text:'Outreach Materials (9/10 this week) continues to be the most reliable appointment driver — consistently outperforming paid channels across every tracked period.'},
+    ],
+    categories:[
+      {name:'General',items:[]},{name:'Provider / Location Campaigns',items:[]},
+      {name:'Organic Social Media',items:[]},{name:'Blogs & SEO',items:[]},
+      {name:'Web',items:[]},{name:'Meetings',items:[]},
+      {name:'Opportunities',items:[]},{name:'New To Discuss',items:[]},
+    ]
+  }
+};
+
+const ALL_WKS=Object.keys(WEEKS).sort();
+let store=loadStore();
+
+let currentMon=getMondayOf('2026-03-30'),activePmTab=null,activeCrTab=null;
+
+function getItemState(wk,id){if(!store[wk])store[wk]={};if(!store[wk][id])store[wk][id]={resolved:false,clientResponse:''};return store[wk][id];}
+function setItemState(wk,id,patch){Object.assign(getItemState(wk,id),patch);saveStore(store);}
+function getPmComment(pmWk,id){const k='pm_'+pmWk;if(!store[k])store[k]={};return store[k][id]||'';}
+function setPmComment(pmWk,id,val){const k='pm_'+pmWk;if(!store[k])store[k]={};store[k][id]=val;saveStore(store);}
+function getCrState(crWk,id){const k='cr_'+crWk;if(!store[k])store[k]={};if(!store[k][id])store[k][id]={resolved:false,clientResponse:''};return store[k][id];}
+function setCrState(crWk,id,patch){const k='cr_'+crWk;if(!store[k])store[k]={};if(!store[k][id])store[k][id]={resolved:false,clientResponse:''};Object.assign(store[k][id],patch);saveStore(store);}
+function parseApps(str){const m=(str||'').match(/(\d+)\/(\d+)/);if(!m)return null;const made=parseInt(m[1]),total=parseInt(m[2]);return{made,total,pct:total>0?Math.round(made/total*100):0};}
+
+function getCarryovers(curWk){
+  const out=[];
+  for(const wk of ALL_WKS){
+    if(wk>=curWk)continue;
+    const wd=WEEKS[wk];if(!wd)continue;
+    for(const cat of wd.categories){
+      for(const item of cat.items){
+        if(!item.hot)continue;
+        if(!getItemState(wk,item.id).resolved)
+          out.push({wk,wkLabel:wd.label,catName:cat.name,id:item.id,text:item.text,links:item.links||[],item});
+      }
+    }
+  }
+  return out;
+}
+
+function getAllHotCarryovers(curWk){
+  const out=[];
+  for(const wk of ALL_WKS){
+    if(wk>=curWk)continue;
+    const wd=WEEKS[wk];if(!wd)continue;
+    for(const cat of wd.categories){
+      for(const item of cat.items){
+        if(!item.hot)continue;
+        out.push({wk,wkLabel:wd.label,catName:cat.name,id:item.id,text:item.text,links:item.links||[],item});
+      }
+    }
+  }
+  return out;
+}
+
+function rLinks(links){if(!links||!links.length)return'';return`<div class="links-section"><span class="links-label">Links</span>${links.map(l=>`<a class="link-chip" href="${l.url}" target="_blank" rel="noopener">${EXT}${esc(l.label)}</a>`).join('')}</div>`;}
+
+// ── EDIT MODALS ───────────────────────────────────────────────────────────────
+let _editWk=null,_editId=null,_editIsPm=false,_editPmWk=null;
+function openTextModal(wk,id){_editWk=wk;_editId=id;_editIsPm=false;const wd=WEEKS[wk];let found=null;for(const cat of wd.categories){const item=cat.items.find(i=>i.id===id);if(item){found=item;break;}}document.getElementById('edit-item-ta').value=found?found.text:'';document.getElementById('edit-text-modal').style.display='flex';}
+function openPmTextModal(pmWk,id){_editIsPm=true;_editPmWk=pmWk;_editId=id;const pm=PM[pmWk];let found=null;['ocli','lasik'].forEach(k=>{if(!found)found=pm[k].find(i=>i.id===id);});document.getElementById('edit-item-ta').value=found?found.text:'';document.getElementById('edit-text-modal').style.display='flex';}
+function saveTextModal(){const val=document.getElementById('edit-item-ta').value.trim();if(!val)return;if(_editIsPm){const pm=PM[_editPmWk];['ocli','lasik'].forEach(k=>{const item=pm[k].find(i=>i.id===_editId);if(item)item.text=val;});}else{const wd=WEEKS[_editWk];for(const cat of wd.categories){const item=cat.items.find(i=>i.id===_editId);if(item){item.text=val;break;}}}closeTextModal();render();}
+function closeTextModal(){document.getElementById('edit-text-modal').style.display='none';}
+function removeItem(wk,id){if(!confirm('Remove this update?'))return;const wd=WEEKS[wk];if(!wd)return;let removed=false;wd.categories.forEach(cat=>{if(removed)return;const idx=cat.items.findIndex(i=>i.id===id);if(idx>-1){cat.items.splice(idx,1);removed=true;}});if(removed)render();}
+function removePmItem(pmWk,id){if(!confirm('Remove this insight?'))return;const pm=PM[pmWk];if(!pm)return;let removed=false;['ocli','lasik'].forEach(k=>{if(removed)return;const idx=pm[k].findIndex(i=>i.id===id);if(idx>-1){pm[k].splice(idx,1);removed=true;}});if(removed)render();}
+
+let _modalWk=null,_modalId=null,_modalLinks=[];
+function openLinkModal(wk,id){_modalWk=wk;_modalId=id;const wd=WEEKS[wk];let found=null;for(const cat of wd.categories){const item=cat.items.find(i=>i.id===id);if(item){found=item;break;}}_modalLinks=JSON.parse(JSON.stringify(found&&found.links?found.links:[]));renderModalList();document.getElementById('new-link-label').value='';document.getElementById('new-link-url').value='';document.getElementById('link-modal').style.display='flex';}
+function renderModalList(){const el=document.getElementById('modal-link-list');if(!_modalLinks.length){el.innerHTML=`<p style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:8px;">No links yet.</p>`;return;}el.innerHTML=_modalLinks.map((l,i)=>`<div class="link-edit-row"><div class="link-edit-fields"><input value="${esc(l.label)}" placeholder="Label" oninput="_modalLinks[${i}].label=this.value"/><input class="url-input" value="${esc(l.url)}" placeholder="https://…" oninput="_modalLinks[${i}].url=this.value"/></div><button class="btn-del-link" onclick="modalRemoveLink(${i})">&#10005;</button></div>`).join('');}
+function modalRemoveLink(i){_modalLinks.splice(i,1);renderModalList();}
+function modalAddLink(){const label=document.getElementById('new-link-label').value.trim(),url=document.getElementById('new-link-url').value.trim();if(!label||!url)return;_modalLinks.push({label,url});document.getElementById('new-link-label').value='';document.getElementById('new-link-url').value='';renderModalList();}
+function saveLinkModal(){const wd=WEEKS[_modalWk];for(const cat of wd.categories){const item=cat.items.find(i=>i.id===_modalId);if(item){item.links=JSON.parse(JSON.stringify(_modalLinks));break;}}closeLinkModal();render();}
+function closeLinkModal(){document.getElementById('link-modal').style.display='none';}
+
+// ── PAID MEDIA RENDER ─────────────────────────────────────────────────────────
+function renderPm(pmKey){
+  const tabs=Object.keys(PM).sort();
+  if(!activePmTab||!PM[activePmTab])activePmTab=pmKey||tabs[tabs.length-1];
+  const cur=PM[activePmTab],wkLbl=weekLabel(currentMon),pmSaved=getPmComment(activePmTab,'overall');
+  const tabsHtml=tabs.map(k=>`<div class="pm-tab${k===activePmTab?' active':''}" onclick="setPmTab('${k}')">${PM[k].dateRange}</div>`).join('');
+  const buildList=(arr)=>{
+    if(!arr||!arr.length)return`<li style="padding:14px 0;font-size:13px;color:var(--muted);font-style:italic;">No highlights added yet for this period.</li>`;
+    return arr.map(item=>{let body=`<div>${item.text}</div>`;if(item.sub)body+=`<ul>${item.sub.map(s=>`<li>${s}</li>`).join('')}</ul>`;if(item.note)body+=`<div class="pm-note">${item.note}</div>`;if(item.rec)body+=`<div class="pm-rec">${item.rec}</div>`;if(currentUser&&currentUser.role==='admin'){body+=`<div class="pm-item-actions"><button class="action-btn" onclick="openPmTextModal('${activePmTab}','${item.id}')">&#9998; Edit</button><button class="action-btn danger" data-pmwk="${activePmTab}" data-id="${item.id}" onclick="removePmItem(this.dataset.pmwk,this.dataset.id)">&#10005; Remove</button></div>`;}return`<li><div class="pm-item-row"><div class="pm-bl"></div><div class="pm-li-body">${body}</div></div></li>`;}).join('');
+  };
+  return`<div class="pm-module"><div class="pm-header">
+    <div class="pm-header-top"><div class="pm-header-left"><div class="pm-icon">${CHART.replace('currentColor','#c8aff8')}</div><div><div class="pm-title">Paid Media Highlights</div><div class="pm-subtitle">Organic &amp; Refractive Campaign Performance</div></div></div></div>
+    <div class="pm-dash-links">
+      <a class="pm-dash-btn ocli" href="${DASH_OCLI}" target="_blank" rel="noopener">${EXT}&nbsp;<span style="display:flex;flex-direction:column;line-height:1.2;"><span style="font-size:9px;opacity:.7;letter-spacing:.08em;">OCLI VISION</span><span>Paid Media Dashboard</span></span></a>
+      <a class="pm-dash-btn lasik" href="${DASH_LASIK}" target="_blank" rel="noopener">${EXT}&nbsp;<span style="display:flex;flex-direction:column;line-height:1.2;"><span style="font-size:9px;opacity:.7;letter-spacing:.08em;">LASIK BY OCLI VISION</span><span>Paid Media Dashboard</span></span></a>
+    </div>
+    <div class="pm-tabs">${tabsHtml}</div></div>
+    <div class="pm-body">
+      <div class="pm-week-meta">${cur.intro}</div>
+      <div class="pm-section"><div class="pm-section-label ocli" style="display:flex;align-items:center;gap:8px;padding:6px 14px;"><div class="sl-dot"></div><span style="font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--teal);">OCLI VISION</span><span style="font-size:12px;font-weight:400;color:var(--muted);">— Organic</span></div><ul class="pm-list ocli">${buildList(cur.ocli)}</ul></div>
+      <div class="pm-section"><div class="pm-section-label lasik" style="display:flex;align-items:center;gap:8px;padding:6px 14px;"><div class="sl-dot"></div><span style="font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--purple-mid);">LASIK BY OCLI VISION</span><span style="font-size:12px;font-weight:400;color:var(--muted);">— Refractive</span></div><ul class="pm-list lasik">${buildList(cur.lasik)}</ul></div>
+      <div class="pm-comment-zone" style="margin-top:16px;padding-top:16px;border-top:1px dashed #d8cef0;">
+        ${pmSaved?`<div class="pm-comment-saved"><span class="cm-label">Nancy's comment</span>${esc(pmSaved)}</div>`:''}
+        <div class="pm-input-row"><textarea id="pmta-overall" placeholder="Add a comment on this week's paid media insights…" rows="2">${esc(pmSaved)}</textarea><button class="btn-pm-save" onclick="savePmComment('${activePmTab}','overall','Paid Media','${wkLbl}',this)">Save</button></div>
+      </div>
+    </div></div>`;
+}
+async function savePmComment(pmWk,id,section,wkLbl,btn){const ta=document.getElementById('pmta-'+id);if(!ta||!ta.value.trim())return;const msg=ta.value.trim();btn.textContent='Saving…';setPmComment(pmWk,id,msg);await sendNotification({week:wkLbl,section:`Paid Media — ${section}`,item:`Insight ${id}`,message:msg,action_type:'Comment added'});showToast('✓ Comment saved — Christine & David have been notified.');btn.textContent='Save';render();}
+
+// ── CALLRAIL RENDER ────────────────────────────────────────────────────────────
+function renderCallRail(crKey){
+  const tabs=Object.keys(CALLRAIL).sort();
+  if(!activeCrTab||!CALLRAIL[activeCrTab])activeCrTab=crKey||tabs[tabs.length-1];
+  const cur=CALLRAIL[activeCrTab],wkLbl=weekLabel(currentMon);
+  const tabsHtml=tabs.map(k=>`<div class="cr-tab${k===activeCrTab?' active':''}" onclick="setCrTab('${k}')">${CALLRAIL[k].dateRange}</div>`).join('');
+  const sourcesHtml=cur.sources.map(src=>{
+    const st=getCrState(activeCrTab,src.id),apps=parseApps(src.appsMade);
+    const appColor=!apps?'#888':apps.pct>=80?'var(--green)':apps.pct>=50?'var(--gold)':'var(--red)';
+    const appBg=!apps?'#f5f6f8':apps.pct>=80?'var(--green-light)':apps.pct>=50?'#fffbf0':'var(--red-light)';
+    const saved=st.clientResponse||'';
+    let h=`<div class="cr-card${st.resolved?' cr-done':''}">`;
+    h+=`<div class="cr-card-header"><span class="cr-src-label">${src.name}</span>${st.resolved?'<span class="cr-done-tag">&#10003; Resolved</span>':''}</div>`;
+    h+=`<div class="cr-apps-row" style="background:${appBg};"><div class="cr-apps-num" style="color:${appColor};">${src.appsMade}</div><div class="cr-apps-label">Apps Made</div></div>`;
+    h+=`<div class="cr-stats"><div class="cr-stat"><div class="cr-stat-num">${src.totalCalls}</div><div class="cr-stat-lbl">Total Calls</div></div><div class="cr-stat"><div class="cr-stat-num" style="color:var(--gold);">${src.underOneMin}</div><div class="cr-stat-lbl">Under 1 Min</div></div><div class="cr-stat"><div class="cr-stat-num" style="color:var(--red);">${src.abandoned}</div><div class="cr-stat-lbl">Abandoned</div></div></div>`;
+    h+=`<div class="cr-notes">${src.notes}</div>`;
+    if(src.noteCallout)h+=`<div class="cr-note-callout">&#128204; ${src.noteCallout}</div>`;
+    if(st.resolved)h+=`<div class="cr-resolved-bar">&#10003; Resolved${st.clientResponse?` — <em>"${esc(st.clientResponse)}"</em>`:''}<button onclick="reopenCr('${activeCrTab}','${src.id}')">Reopen</button></div>`;
+    h+=`<div class="cr-comment-zone">${saved&&!st.resolved?`<div class="cr-comment-saved">${esc(saved)}</div>`:''}
+      <div><button class="action-btn" style="color:var(--teal);border-color:#b0d9d4;background:var(--teal-light);" onclick="toggleCrBox('${src.id}')">&#43; Leave a comment</button></div>
+      <div id="cr-cbox-${src.id}" style="display:none;margin-top:8px;"><div class="client-input-row">
+        <textarea id="cr-ta-${src.id}" placeholder="Add a comment…" rows="2">${esc(saved)}</textarea>
+        <div class="client-actions">
+          <button class="btn-submit" onclick="saveCrComment('${activeCrTab}','${src.id}','${src.name}','${wkLbl}')">Save</button>
+          ${!st.resolved?`<button class="btn-resolve" onclick="resolveCr('${activeCrTab}','${src.id}','${src.name}','${wkLbl}')">&#10003; Resolve</button>`:''}
+        </div>
+      </div></div>
+    </div></div>`;return h;
+  }).join('');
+  return`<div class="cr-module"><div class="cr-header">
+    <div class="cr-header-top"><div class="cr-header-left"><div class="cr-icon">📞</div><div><div class="cr-title">CallRail Weekly Audit</div><div class="cr-subtitle">Call Quality &amp; Appointment Tracking — PPC · Outreach · Website</div></div></div>
+    <a class="cr-link-btn" href="${cur.linkUrl}" target="_blank" rel="noopener">${EXT}&nbsp;${esc(cur.linkLabel)}</a></div>
+    <div class="cr-tabs">${tabsHtml}</div></div>
+    <div class="cr-body"><div class="cr-grid">${sourcesHtml}</div></div></div>`;
+}
+function toggleCrBox(id){const box=document.getElementById('cr-cbox-'+id);if(!box)return;box.style.display=box.style.display==='none'?'block':'none';}
+async function saveCrComment(crWk,id,srcName,wkLbl){const ta=document.getElementById('cr-ta-'+id);if(!ta||!ta.value.trim())return;const msg=ta.value.trim();setCrState(crWk,id,{clientResponse:msg});await sendNotification({week:wkLbl,section:'CallRail — '+srcName,item:srcName,message:msg,action_type:'Comment added'});showToast('✓ Comment saved.');render();}
+async function resolveCr(crWk,id,srcName,wkLbl){const ta=document.getElementById('cr-ta-'+id);const msg=ta?ta.value.trim():'';setCrState(crWk,id,{resolved:true,clientResponse:msg});showToast('✓ CallRail item noted as resolved.');render();}
+function reopenCr(crWk,id){setCrState(crWk,id,{resolved:false});render();}
+function setCrTab(k){activeCrTab=k;render();}
+
+// ── ROW RENDERERS ─────────────────────────────────────────────────────────────
+function renderRow(wk,item){
+  const st=getItemState(wk,item.id),res=st.resolved;
+  let h=`<div class="item-row ${item.hot?(res?'is-done':'is-hot'):''}" id="row-${item.id}">
+    <div class="item-bullet ${item.hot?(res?'done':'hot'):'normal'}"></div>
+    <div class="item-content">
+      <div class="item-tags">${item.hot&&!res?`<span class="tag action">${item.approval?'Approval Needed':'Action Needed'}</span>`:''}${res?`<span class="tag done-tag">&#10003; Resolved</span>`:''}</div>
+      <div class="item-text">${item.text}</div>`;
+  if(item.note)h+=`<div class="item-note">&#128204; <strong>Note:</strong> ${item.note}</div>`;
+  if(item.approveCaption)h+=`<div class="approve-block"><div class="approve-label">Proposed Copy — Awaiting Approval</div>${item.approveCaption}</div>`;
+  h+=rLinks(item.links||[]);
+  if(currentUser&&currentUser.role==='admin'){h+=`<div class="item-actions"><button class="action-btn" onclick="openTextModal('${wk}','${item.id}')">&#9998; Edit</button><button class="action-btn" onclick="openLinkModal('${wk}','${item.id}')">${item.links&&item.links.length?'&#9998; Edit links':'+ Add links'}</button><button class="action-btn danger" data-wk="${wk}" data-id="${item.id}" onclick="removeItem(this.dataset.wk,this.dataset.id)">&#10005; Remove</button></div>`;}
+  h+=buildClientZone(wk,item,st,res);
+  h+=`</div></div>`;return h;
+}
+
+function renderCarryRow(origWk,wkLabel,item){
+  const st=getItemState(origWk,item.id),res=st.resolved;
+  let h=`<div class="item-row is-carry${res?' is-done':''}" id="row-${item.id}">
+    <div class="item-bullet ${res?'done':'carry'}"></div>
+    <div class="item-content">
+      <div class="item-tags">
+        <span class="tag carry-tag">&#8629; ${wkLabel}</span>
+        ${item.hot&&!res?`<span class="tag action">${item.approval?'Approval Needed':'Action Needed'}</span>`:''}
+        ${res?`<span class="tag done-tag">&#10003; Resolved</span>`:''}
+      </div>
+      <div class="item-text">${item.text}</div>`;
+  if(item.note)h+=`<div class="item-note">&#128204; <strong>Note:</strong> ${item.note}</div>`;
+  if(item.approveCaption)h+=`<div class="approve-block"><div class="approve-label">Proposed Copy — Awaiting Approval</div>${item.approveCaption}</div>`;
+  h+=rLinks(item.links||[]);
+  h+=buildClientZone(origWk,item,st,res);
+  h+=`</div></div>`;return h;
+}
+
+function buildClientZone(wk,item,st,res){
+  let h=`<div class="client-zone">`;
+  if(res){
+    h+=`<div class="resolved-bar">&#10003; Resolved${st.clientResponse?` — <span style="font-weight:400;font-style:italic">"${esc(st.clientResponse)}"</span>`:''}<button onclick="reopenItem('${wk}','${item.id}')">Reopen</button></div>`;
+  } else {
+    if(st.clientResponse)h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div class="client-zone-label" style="margin-bottom:0;">Nancy's response</div><button class="action-btn danger" style="padding:2px 8px;font-size:11px;" onclick="clearComment('${wk}','${item.id}')">&#10005; Remove</button></div><div class="client-response-display">${esc(st.clientResponse)}</div>`;
+    const tl=item.hot?(item.approval?'&#43; Confirm or leave feedback':'&#43; Respond or clarify'):'&#43; Leave a comment';
+    h+=`<div id="toggle-${item.id}"><button class="action-btn" style="margin-top:6px;color:var(--teal);border-color:#b0d9d4;background:var(--teal-light);" onclick="toggleCommentBox('${item.id}','${wk}')">${tl}</button></div>
+    <div id="cbox-${item.id}" style="display:none;margin-top:8px;">
+      ${item.hot&&item.clientPrompt?`<div class="client-zone-label urgent">${item.clientPrompt}</div>`:''}
+      <div class="client-input-row">
+        <textarea id="ta-${item.id}" placeholder="${item.hot?'Add a response or comment…':'Add a comment…'}" rows="2">${esc(st.clientResponse||'')}</textarea>
+        <div class="client-actions">
+          <button class="btn-submit" onclick="submitComment('${wk}','${item.id}','${esc(item.text.replace(/<[^>]+>/g,'').slice(0,60))}')">Save</button>
+          ${item.hot?`<button class="btn-resolve" onclick="resolveItem('${wk}','${item.id}','${esc(item.text.replace(/<[^>]+>/g,'').slice(0,60))}')">&#10003; Resolve</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
+  h+=`</div>`;return h;
+}
+
+function openAndScrollTo(sId,itemId){
+  const c=document.getElementById('content-'+sId);
+  const a=document.getElementById('arrow-'+sId);
+  const w=document.getElementById('wrap-'+sId);
+  if(c){c.classList.add('open');if(a)a.classList.add('open');if(w)w.classList.add('open');openSections.add(sId);}
+  setTimeout(()=>{
+    const el=document.getElementById('row-'+itemId);
+    if(!el)return;
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.outline='3px solid var(--gold)';el.style.borderRadius='8px';
+    setTimeout(()=>{el.style.outline='3px solid transparent';setTimeout(()=>{el.style.outline='';el.style.borderRadius='';},600);},2000);
+  },250);
+}
+
+// ── MAIN RENDER ───────────────────────────────────────────────────────────────
+function render(){
+  mergeExtraItems();
+  const wk=weekKey(currentMon),wd=WEEKS[wk],main=document.getElementById('main-content'),wkLbl=weekLabel(currentMon);
+  document.getElementById('week-display').textContent=wkLbl;
+  document.getElementById('pt-week-badge').innerHTML=`&#128197; Week of &nbsp;<strong>${wkLbl}</strong>`;
+
+  if(!wd){
+    ['stat-carry','stat-hot','stat-done','stat-total'].forEach(id=>document.getElementById(id).textContent='0');
+    main.innerHTML=`<div class="no-report"><p style="font-size:28px;margin-bottom:12px;opacity:.4;">📋</p><p style="font-size:16px;font-weight:500;color:var(--navy);margin-bottom:8px;">No report for this week</p><p style="font-size:13px;color:var(--muted);">Week of ${wkLbl}</p></div>`;
+    return;
+  }
+
+  const allItems=wd.categories.flatMap(c=>c.items);
+  const hotItems=allItems.filter(i=>i.hot);
+  const resolvedHot=hotItems.filter(i=>getItemState(wk,i.id).resolved);
+  const openHot=hotItems.filter(i=>!getItemState(wk,i.id).resolved);
+  const carryovers=getCarryovers(wk);
+
+  const totalActionItems=openHot.length+carryovers.length;
+  const totalResolved=resolvedHot.length;
+
+  document.getElementById('stat-carry').textContent=carryovers.length;
+  document.getElementById('stat-hot').textContent=totalActionItems;
+  document.getElementById('stat-done').textContent=totalResolved;
+  document.getElementById('stat-total').textContent=allItems.length;
+
+  const carryMap={};
+  carryovers.forEach(co=>{
+    if(!carryMap[co.catName])carryMap[co.catName]=[];
+    carryMap[co.catName].push(co);
+  });
+
+  let html='';
+  html+=`<div class="summary-grid">`;
+
+  const intel=wd.intelligence||[];
+  const allActions=[...openHot.map(item=>({type:'current',item})),...carryovers.map(co=>({type:'carry',co}))];
+  html+=`<div class="sum-card action-card"><div class="sum-card-hdr"><div class="sum-card-title">&#9888; Action Required</div><div class="sum-badge">${allActions.length}</div></div><div class="sum-card-body">`;
+  if(!allActions.length){html+=`<div class="sum-all-clear">&#10003;&nbsp; All clear this week!</div>`;}
+  else allActions.forEach(({type,item,co})=>{
+    if(type==='current'){
+      const plain=item.text.replace(/<[^>]+>/g,'');
+      let sId='';
+      for(const cat of wd.categories){if(cat.items.find(i=>i.id===item.id)){sId='cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase();break;}}
+      html+=`<div class="sum-item"><div class="sum-dot"></div><div class="sum-inner"><div class="sum-meta">${item.approval?'Approval Needed':'Action Needed'}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><button class="sum-go" onclick="openAndScrollTo('${sId}','${item.id}')">↓ Go</button></div>`;
+    } else {
+      const plain=co.text.replace(/<[^>]+>/g,'');
+      const sId='cat-'+co.catName.replace(/[\s\/&]+/g,'-').toLowerCase();
+      html+=`<div class="sum-item"><div class="sum-dot" style="background:var(--gold)"></div><div class="sum-inner"><div class="sum-meta" style="color:#9a7020;">Carried — ${co.wkLabel}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><button class="sum-go" onclick="openAndScrollTo('${sId}','${co.id}')">↓ Go</button></div>`;
+    }
+  });
+  html+=`</div></div>`;
+
+  html+=`<div class="sum-card intel"><div class="sum-card-hdr"><div class="sum-card-title">&#129504; Lens Intelligence</div><div class="sum-badge">${intel.length}</div></div><div class="sum-card-body">`;
+  if(!intel.length){html+=`<div class="sum-empty">No intelligence briefings for this week yet.</div>`;}
+  else intel.forEach(item=>{const cat=typeof item==='object'&&item.cat?item.cat:'Insight';const txt=typeof item==='object'?item.text:item;html+=`<div class="intel-item"><div class="intel-cat">${cat}</div><div class="intel-text">${txt}</div></div>`;});
+  html+=`</div></div></div>`;
+
+  html+=makeCollapsible('paid-media','Paid Media Highlights','Organic &amp; Refractive performance',renderPm(wd.pmKey),'purple');
+  if(wd.crKey&&CALLRAIL[wd.crKey])html+=makeCollapsible('callrail','CallRail Weekly Audit','Call quality &amp; appointment tracking',renderCallRail(wd.crKey),'blue');
+
+  html+=`<div class="cat-grid">`;
+  wd.categories.forEach(cat=>{
+    const catCarryovers=carryMap[cat.name]||[];
+    const active=cat.items.filter(i=>!getItemState(wk,i.id).resolved);
+    const resolved=cat.items.filter(i=>getItemState(wk,i.id).resolved);
+    const activeCarry=catCarryovers.filter(co=>!getItemState(co.wk,co.id).resolved);
+    const resolvedCarry=catCarryovers.filter(co=>getItemState(co.wk,co.id).resolved);
+
+    let inner='';
+    const hasAnything=active.length||resolved.length||activeCarry.length||resolvedCarry.length;
+    if(!hasAnything){
+      inner+=`<div class="empty-row">No updates this week.</div>`;
+    } else {
+      activeCarry.forEach(co=>{ inner+=renderCarryRow(co.wk,co.wkLabel,co.item); });
+      if(!active.length&&!activeCarry.length){inner+=`<div class="empty-row">No open updates this week.</div>`;}
+      else active.forEach(item=>{inner+=renderRow(wk,item);});
+      const totalRes=resolved.length+resolvedCarry.length;
+      if(totalRes>0){
+        const rId=`resolved-${cat.name.replace(/[\s\/&]+/g,'-').toLowerCase()}`;
+        inner+=`<div style="border-top:1px solid #f0f2f5;"><button onclick="toggleResolved('${rId}')" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--muted);">
+          <span style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span><span style="font-weight:600;">${totalRes} Resolved item${totalRes>1?'s':''}</span></span>
+          <span id="rarrow-${rId}" style="font-size:12px;transition:transform .2s;">&#9660;</span></button>
+          <div id="${rId}" style="display:none;">`;
+        resolvedCarry.forEach(co=>{inner+=renderCarryRow(co.wk,co.wkLabel,co.item);});
+        resolved.forEach(item=>{inner+=renderRow(wk,item);});
+        inner+=`</div></div>`;
+      }
+    }
+    const hotCount=active.filter(i=>i.hot).length+activeCarry.filter(co=>co.item.hot).length;
+    const totalCount=cat.items.length+catCarryovers.length;
+    const meta=totalCount===0?'No updates':`${totalCount} update${totalCount!==1?'s':''}${hotCount>0?` · <span style="color:var(--red);font-weight:600;">${hotCount} action${hotCount>1?'s':''}</span>`:''}`;
+    html+=makeCollapsible('cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase(),cat.name,meta,inner,'navy');
+  });
+  html+=`</div>`;
+  main.innerHTML=html;
+}
+
+function makeCollapsible(id,title,meta,content,theme){
+  const colors={'purple':'var(--purple-mid)','blue':'var(--blue)','teal':'var(--teal)'};
+  const accent=colors[theme]||'var(--navy)',isOpen=openSections.has(id);
+  return`<div class="section-wrap${isOpen?' open':''}" id="wrap-${id}"><div class="section-toggle" onclick="toggleSection('${id}')" style="border-left:4px solid ${accent};"><div class="section-toggle-left"><span class="section-toggle-title">${title}</span><span class="section-toggle-meta">${meta}</span></div><span class="section-toggle-arrow${isOpen?' open':''}" id="arrow-${id}">&#9660;</span></div><div class="section-content${isOpen?' open':''}" id="content-${id}">${content}</div></div>`;
+}
+
+let openSections=new Set();
+function toggleSection(id){const wrap=document.getElementById('wrap-'+id),content=document.getElementById('content-'+id),arrow=document.getElementById('arrow-'+id);if(!wrap||!content||!arrow)return;const isOpen=content.classList.contains('open');content.classList.toggle('open',!isOpen);arrow.classList.toggle('open',!isOpen);wrap.classList.toggle('open',!isOpen);if(!isOpen)openSections.add(id);else openSections.delete(id);}
+function toggleResolved(id){const el=document.getElementById(id),arrow=document.getElementById('rarrow-'+id);if(!el)return;const open=el.style.display==='none';el.style.display=open?'block':'none';if(arrow)arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';}
+function toggleCommentBox(id,wk){const box=document.getElementById('cbox-'+id),btn=document.querySelector(`#toggle-${id} button`);if(!box)return;const open=box.style.display==='none';box.style.display=open?'block':'none';if(btn){const item=findItem(wk,id);const label=item?(item.hot?(item.approval?'Confirm or leave feedback':'Respond or clarify'):'Leave a comment'):'Leave a comment';btn.innerHTML=open?`&#8722; Hide`:`&#43; ${label}`;}}
+function findItem(wk,id){const wd=WEEKS[wk];if(!wd)return null;for(const cat of wd.categories){const item=cat.items.find(i=>i.id===id);if(item)return item;}return null;}
+function clearComment(wk,id){if(!confirm('Remove this comment?'))return;setItemState(wk,id,{clientResponse:''});render();}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');}
+function highlightItem(id){
+  const curWd=WEEKS[weekKey(currentMon)];
+  if(!curWd)return;
+  let sId=null;
+  for(const cat of curWd.categories){if(cat.items.find(i=>i.id===id)){sId='cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase();break;}}
+  if(sId)openAndScrollTo(sId,id);
+}
+async function submitComment(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);if(!ta)return;const msg=ta.value.trim();if(!msg)return;setItemState(wk,id,{clientResponse:msg});await sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg,action_type:'Comment added'});showToast('✓ Comment saved — Christine & David have been notified.');render();}
+async function resolveItem(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);const msg=ta?ta.value.trim():'';setItemState(wk,id,{resolved:true,clientResponse:msg});await sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg||'(no comment)',action_type:'Item resolved ✓'});showToast('✓ Item resolved — Christine & David have been notified.');render();}
+function reopenItem(wk,id){setItemState(wk,id,{resolved:false});render();}
+function changeWeek(dir,jumpToKey){if(jumpToKey)currentMon=getMondayOf(jumpToKey.replace('week_',''));else currentMon=addWeeks(currentMon,dir);render();}
+function setPmTab(k){activePmTab=k;render();}
+
+// render() called after login — see doLogin()
+
+
+// ════════════════════════════════════════════════════════════════════════════
+//  AUTH & MODE MANAGEMENT
+// ════════════════════════════════════════════════════════════════════════════
+const USERS_AUTH = {
+  'NFSVP':    { password: 'Vision',     role: 'client', display: 'Nancy Fairbrother' },
+  'MDGADMIN': { password: 'SVPHotlist', role: 'admin',  display: 'Admin (MDG)'       },
+};
+
+let currentUser = null;
+let adminMode = 'hub'; // 'hub' | 'intake'
+
+// Live enable/disable login button
+(function(){
+  const u = document.getElementById('lf-username');
+  const p = document.getElementById('lf-password');
+  const b = document.getElementById('btn-login');
+  function check(){ b.disabled = !u.value.trim() || !p.value; }
+  u.addEventListener('input', check);
+  p.addEventListener('input', check);
+  p.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+  u.addEventListener('keydown', e => { if(e.key === 'Enter') p.focus(); });
+})();
+
+function togglePw() {
+  const p = document.getElementById('lf-password');
+  const b = document.getElementById('pw-toggle-btn');
+  p.type = p.type === 'password' ? 'text' : 'password';
+  b.textContent = p.type === 'password' ? '👁' : '🙈';
+}
+
+function doLogin() {
+  const u = document.getElementById('lf-username').value.trim();
+  const p = document.getElementById('lf-password').value;
+  const err = document.getElementById('lf-err');
+  const btn = document.getElementById('btn-login');
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  err.style.display = 'none';
+
+  setTimeout(() => {
+    const user = USERS_AUTH[u];
+    if (user && user.password === p) {
+      currentUser = { username: u, role: user.role, display: user.display };
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+      if (user.role === 'admin') {
+        document.getElementById('admin-nav-bar').style.display = 'flex';
+        document.getElementById('anb-user-label').textContent = u;
+        // Apply admin-only element visibility
+        document.querySelectorAll('.admin-only-elem').forEach(el => el.style.display = '');
+      } else {
+        // Client: hide admin-only elements after render
+        document.querySelectorAll('.admin-only-elem').forEach(el => el.style.display = 'none');
+      }
+
+      activePmTab = null;
+      activeCrTab = null;
+      initIntakeWeek();
+      initFirebase();
+      render();
+    } else {
+      err.textContent = '⚠ Incorrect username or password.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In →';
+    }
+  }, 450);
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('admin-nav-bar').style.display = 'none';
+  document.getElementById('lf-username').value = '';
+  document.getElementById('lf-password').value = '';
+  document.getElementById('lf-err').style.display = 'none';
+  document.getElementById('btn-login').disabled = true;
+  document.getElementById('btn-login').textContent = 'Sign In →';
+}
+
+function setAdminMode(mode) {
+  adminMode = mode;
+  document.getElementById('hub-view').style.display    = mode === 'hub'    ? 'block' : 'none';
+  document.getElementById('intake-view').style.display = mode === 'intake' ? 'block' : 'none';
+  document.querySelectorAll('.anb-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  if (mode === 'intake') renderIntakeForm();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  INTAKE FORM
+// ════════════════════════════════════════════════════════════════════════════
+const INTAKE_DRAFT_KEY = 'svp_intake_draft_v2';
+const WEEKS_EXTRA_KEY  = 'svp_weeks_extra_v2'; // published items from intake
+
+const IF_SECTIONS = [
+  { key:'paid-media',   label:'Paid Media Highlights (OCLI & LASIK)', isPmNote: true  },
+  { key:'callrail',     label:'CallRail Weekly Audit',                isPmNote: true  },
+  { key:'general',      label:'General',                              catName:'General'                      },
+  { key:'campaigns',    label:'Provider / Location Campaigns',        catName:'Provider / Location Campaigns' },
+  { key:'social',       label:'Organic Social Media',                 catName:'Organic Social Media'          },
+  { key:'blogs',        label:'Blogs & SEO',                          catName:'Blogs & SEO'                   },
+  { key:'web',          label:'Web',                                  catName:'Web'                           },
+  { key:'meetings',     label:'Meetings',                             catName:'Meetings'                      },
+  { key:'opportunities',label:'Opportunities',                        catName:'Opportunities'                 },
+  { key:'new-discuss',  label:'New To Discuss',                       catName:'New To Discuss'                },
+];
+
+function loadIntakeDraft() {
+  try { return JSON.parse(localStorage.getItem(INTAKE_DRAFT_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+function persistIntakeDraft(data) {
+  localStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(data));
+}
+
+function getIfVal(key, field) {
+  const el = document.getElementById(`if-${key}-${field}`);
+  return el ? (el.type === 'checkbox' ? el.checked : el.value) : '';
+}
+
+function getIfLinks(key) {
+  const links = [];
+  const rows = document.querySelectorAll(`.if-link-row[data-key="${key}"]`);
+  rows.forEach(row => {
+    const label = row.querySelector('.if-link-label').value.trim();
+    const url   = row.querySelector('.if-link-url').value.trim();
+    if (label || url) links.push({ label: label || url, url });
+  });
+  return links;
+}
+
+
+let intakeTargetMon = null; // set on login to next week
+
+function initIntakeWeek() {
+  // Default to next week (most common: filling out next week's items)
+  intakeTargetMon = addWeeks(currentMon, 1);
+}
+
+function changeIntakeWeek(dir) {
+  intakeTargetMon = addWeeks(intakeTargetMon, dir);
+  updateIntakeWeekNav();
+}
+
+function updateIntakeWeekNav() {
+  if (!intakeTargetMon) return;
+  const wk     = weekKey(intakeTargetMon);
+  const lbl    = weekLabel(intakeTargetMon);
+  const exists = !!WEEKS[wk];
+
+  const disp  = document.getElementById('iwn-display');
+  const badge = document.getElementById('iwn-badge');
+  const prev  = document.getElementById('iwn-prev');
+
+  if (disp)  disp.textContent = lbl;
+  if (badge) badge.innerHTML  = exists
+    ? '<span class="iwn-badge existing">✓ Existing week</span>'
+    : '<span class="iwn-badge new-week">+ New week</span>';
+
+  // Don't allow going back before the earliest WEEKS entry
+  const allWks = Object.keys(WEEKS).sort();
+  if (prev) prev.disabled = allWks.length > 0 && wk <= allWks[0];
+}
+
+function renderIntakeForm() {
+  const draft = loadIntakeDraft();
+  updateIntakeWeekNav();
+
+  let html = '';
+  IF_SECTIONS.forEach(sec => {
+    const d   = draft[sec.key] || {};
+    const hasContent = (d.notes && d.notes.trim()) || (d.links && d.links.length > 0);
+    html += `<div class="intake-sec${hasContent ? ' if-has-content' : ''}" id="if-wrap-${sec.key}">
+      <div class="intake-sec-hdr" onclick="toggleIfSection('${sec.key}')">
+        <span class="intake-sec-title">${sec.label}</span>
+        <span id="if-arrow-${sec.key}" style="color:rgba(255,255,255,.5);font-size:12px;transition:transform .2s;">▼</span>
+      </div>
+      <div class="intake-sec-body" id="if-body-${sec.key}" style="display:none;">`;
+
+    if (sec.isPmNote) {
+      html += `<div class="if-pm-note">📌 <strong>Note:</strong> For structured ${sec.label} data (charts, stats, tabs), use <strong>Hub Edit Mode</strong> directly. This section is for free-form notes only.</div><div style="margin-top:12px;">`;
+    }
+
+    html += `
+        <label class="if-label" style="margin-top:${sec.isPmNote?'12':'0'}px;">Notes / Updates</label>
+        <textarea class="if-ta" id="if-${sec.key}-notes" placeholder="Enter updates for ${sec.label}…\n\nUse Enter for new lines. Any context, copy, stats, action items.">${esc(d.notes||'')}</textarea>`;
+
+    if (!sec.isPmNote) {
+      html += `
+        <div class="if-checks">
+          <label class="if-check"><input type="checkbox" id="if-${sec.key}-update" ${d.update?'checked':''}/> Update</label>
+          <label class="if-check"><input type="checkbox" id="if-${sec.key}-action" ${d.action?'checked':''}/> Action Needed</label>
+        </div>`;
+    }
+
+    const savedLinks = d.links || [];
+    html += `
+        <label class="if-label" style="margin-top:14px;">Links</label>
+        <div id="if-links-${sec.key}">`;
+    const displayLinks = savedLinks.length > 0 ? savedLinks : [{ label:'', url:'' }];
+    displayLinks.forEach((lk, i) => {
+      html += `<div class="if-link-row" data-key="${sec.key}">
+        <input class="if-link-in if-link-label" placeholder="Label" value="${esc(lk.label)}" />
+        <input class="if-link-in if-link-url"   placeholder="https://…"  value="${esc(lk.url)}" />
+        <button onclick="removeIfLink(this)" style="background:#fdf0ef;border:1px solid #f0cbc8;border-radius:6px;color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;width:28px;height:28px;">✕</button>
+      </div>`;
+    });
+    html += `</div>
+        <button onclick="addIfLink('${sec.key}')" style="margin-top:6px;padding:5px 13px;background:var(--teal-light);color:var(--teal);border:1px solid #b0d9d4;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">+ Add Link</button>`;
+
+    if (sec.isPmNote) html += '</div>';
+    html += `</div></div>`;
+  });
+
+  document.getElementById('intake-sections-body').innerHTML = html;
+
+  // Re-open sections that had content
+  IF_SECTIONS.forEach(sec => {
+    const d = draft[sec.key] || {};
+    if (d.notes && d.notes.trim()) openIfSection(sec.key);
+  });
+}
+
+function toggleIfSection(key) {
+  const body  = document.getElementById('if-body-'+key);
+  const arrow = document.getElementById('if-arrow-'+key);
+  const open  = body.style.display !== 'none';
+  body.style.display  = open ? 'none' : 'block';
+  arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+function openIfSection(key) {
+  const body  = document.getElementById('if-body-'+key);
+  const arrow = document.getElementById('if-arrow-'+key);
+  if(body) body.style.display = 'block';
+  if(arrow) arrow.style.transform = 'rotate(180deg)';
+}
+
+function addIfLink(key) {
+  const container = document.getElementById('if-links-'+key);
+  const row = document.createElement('div');
+  row.className = 'if-link-row';
+  row.setAttribute('data-key', key);
+  row.innerHTML = `<input class="if-link-in if-link-label" placeholder="Label" value="" />
+    <input class="if-link-in if-link-url" placeholder="https://…" value="" />
+    <button onclick="removeIfLink(this)" style="background:#fdf0ef;border:1px solid #f0cbc8;border-radius:6px;color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;width:28px;height:28px;">✕</button>`;
+  container.appendChild(row);
+}
+function removeIfLink(btn) { btn.closest('.if-link-row').remove(); }
+
+function collectIntakeDraft() {
+  const draft = { _weekOf: weekLabel(intakeTargetMon) };
+  IF_SECTIONS.forEach(sec => {
+    const notes    = document.getElementById(`if-${sec.key}-notes`);
+    const actionEl = document.getElementById(`if-${sec.key}-action`);
+    const updateEl = document.getElementById(`if-${sec.key}-update`);
+    draft[sec.key] = {
+      notes:  notes    ? notes.value    : '',
+      update: updateEl ? updateEl.checked : false,
+      action: actionEl ? actionEl.checked : false,
+      links:  getIfLinks(sec.key),
+    };
+  });
+  return draft;
+}
+
+function saveIntakeDraft() {
+  const draft = collectIntakeDraft();
+  persistIntakeDraft(draft);
+  document.getElementById('intake-status').textContent = '💾 Draft saved!';
+  setTimeout(() => document.getElementById('intake-status').textContent = 'Fill in your updates, then publish to the hub.', 2500);
+}
+
+function clearIntakeForm() {
+  if (!confirm('Clear all intake form data? This cannot be undone.')) return;
+  localStorage.removeItem(INTAKE_DRAFT_KEY);
+  renderIntakeForm();
+  document.getElementById('intake-status').textContent = 'Form cleared.';
+}
+
+// Load extra items stored from previous publishes
+function loadExtraItems() {
+  // Sync read from localStorage (Firebase data is cached here via onSnapshot)
+  try { return JSON.parse(localStorage.getItem(WEEKS_EXTRA_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveExtraItems(data) { localStorage.setItem(WEEKS_EXTRA_KEY, JSON.stringify(data)); }
+
+// Merge extra (published intake) items into WEEKS categories at render time
+function mergeExtraItems() {
+  const extra = loadExtraItems();
+  Object.keys(extra).forEach(wk => {
+    if (!WEEKS[wk]) return;
+    Object.keys(extra[wk]).forEach(catName => {
+      const cat = WEEKS[wk].categories.find(c => c.name === catName);
+      if (!cat) return;
+      const existingIds = new Set(cat.items.map(i => i.id));
+      extra[wk][catName].forEach(item => {
+        if (!existingIds.has(item.id)) { cat.items.push(item); existingIds.add(item.id); }
+      });
+    });
+  });
+}
+
+async function publishIntakeToHub() {
+  const draft = collectIntakeDraft();
+  persistIntakeDraft(draft);
+
+  const wk = weekKey(intakeTargetMon);
+  if (!WEEKS[wk]) {
+    WEEKS[wk] = {
+      label: weekLabel(intakeTargetMon),
+      pmKey: wk, crKey: null, intelligence: [],
+      categories: [
+        'General','Provider / Location Campaigns','Organic Social Media',
+        'Blogs & SEO','Web','Meetings','Opportunities','New To Discuss'
+      ].map(n => ({ name: n, items: [] }))
+    };
+  }
+
+  const extra  = loadExtraItems();
+  if (!extra[wk]) extra[wk] = {};
+
+  let publishedCount = 0;
+  IF_SECTIONS.filter(s => !s.isPmNote).forEach(sec => {
+    const d = draft[sec.key];
+    if (!d || !d.notes || !d.notes.trim()) return;
+    const catName = sec.catName;
+    const newItem = {
+      id:       'if_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      hot:      !!d.action,
+      approval: false,
+      text:     d.notes.trim().replace(/\n/g, '<br>'),
+      links:    (d.links || []).filter(l => l.url),
+    };
+    if (!extra[wk][catName]) extra[wk][catName] = [];
+    extra[wk][catName].push(newItem);
+    publishedCount++;
+  });
+
+  if (!publishedCount) {
+    showToast('Nothing to publish — fill in at least one section first.', true);
+    return;
+  }
+
+  const pushed = await pushExtraItemsToFirebase(extra);
+  mergeExtraItems();
+  const msg = pushed
+    ? `✓ ${publishedCount} section(s) published live — client will see updates immediately!`
+    : `✓ ${publishedCount} section(s) saved locally. Connect Firebase for cross-device sync.`;
+  showToast(msg);
+  setAdminMode('hub');
+  render();
+}
+
+// Call mergeExtraItems early so published items are always loaded
+// (happens after WEEKS is defined, called from doLogin → render)
+
+</script>
+
+  </div><!-- /hub-view -->
+
+  <!-- INTAKE FORM VIEW (admin only) -->
+  <div id="intake-view" style="display:none">
+    <div class="intake-top">
+      <div class="intake-top-inner">
+        <div>
+          <div class="intake-eyebrow">Admin — Weekly Input</div>
+          <div class="intake-h1">Intake Form</div>
+        </div>
+        <div class="intake-week-nav">
+          <button class="iwn-btn" id="iwn-prev" onclick="changeIntakeWeek(-1)">&#8592;</button>
+          <div class="iwn-center">
+            <div class="iwn-label">Targeting week of</div>
+            <div class="iwn-week" id="iwn-display">—</div>
+            <div id="iwn-badge"></div>
+          </div>
+          <button class="iwn-btn" onclick="changeIntakeWeek(1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+    <div class="intake-body" id="intake-sections-body">
+      <!-- Rendered by JS -->
+    </div>
+    <div class="intake-sticky-bar">
+      <span class="status-text" id="intake-status">Fill in your updates, then publish to the hub.</span>
+      <button class="btn-clr" onclick="clearIntakeForm()">🗑 Clear</button>
+      <button class="btn-save-draft" onclick="saveIntakeDraft()">💾 Save Draft</button>
+      <button class="btn-publish" onclick="publishIntakeToHub()">🚀 Publish to Hub</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+</body>
+</html>

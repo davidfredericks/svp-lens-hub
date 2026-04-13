@@ -1538,7 +1538,7 @@ function addIfLink(key) {
 function removeIfLink(btn) { btn.closest('.if-link-row').remove(); }
 
 function collectIntakeDraft() {
-  const draft = { _weekOf: weekLabel(intakeTargetMon) };
+  const draft = { _weekOf: weekLabel(intakeTargetMon || currentMon) };
   IF_SECTIONS.forEach(sec => {
     const notes    = document.getElementById(`if-${sec.key}-notes`);
     const actionEl = document.getElementById(`if-${sec.key}-action`);
@@ -1577,9 +1577,23 @@ function saveExtraItems(data) { localStorage.setItem(WEEKS_EXTRA_KEY, JSON.strin
 // Merge extra (published intake) items into WEEKS categories at render time
 function mergeExtraItems() {
   const extra = loadExtraItems();
+  const STD_CATS = ['General','Provider / Location Campaigns','Organic Social Media',
+    'Blogs & SEO','Web','Meetings','Opportunities','New To Discuss'];
   Object.keys(extra).forEach(wk => {
-    if (!WEEKS[wk]) return;
+    // Auto-create week in WEEKS if it doesn't exist yet
+    if (!WEEKS[wk]) {
+      WEEKS[wk] = {
+        label: wk.replace('week_','').replace(/-/g,'/'),
+        pmKey: null, crKey: null, intelligence: [],
+        categories: STD_CATS.map(n => ({ name: n, items: [] }))
+      };
+    }
+    // Merge intelligence if stored in _meta
+    if (extra[wk]._meta && extra[wk]._meta.intelligence) {
+      WEEKS[wk].intelligence = extra[wk]._meta.intelligence;
+    }
     Object.keys(extra[wk]).forEach(catName => {
+      if (catName === '_meta') return; // skip metadata
       const cat = WEEKS[wk].categories.find(c => c.name === catName);
       if (!cat) return;
       const existingIds = new Set(cat.items.map(i => i.id));
@@ -1616,8 +1630,7 @@ async function publishIntakeToHub() {
     const d = draft[sec.key];
     if (!d || !d.notes || !d.notes.trim()) return;
 
-    allRawContent.push(`[${sec.label}]
-${d.notes.trim()}`);
+    allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
 
     if (sec.isPmNote) return; // PM/CallRail handled separately via raw display
 
@@ -1721,6 +1734,10 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
     : `✓ Saved locally. ${publishedCount} section(s) + Lens Intelligence ready.`;
 
   if (pubBtn) { pubBtn.textContent = '🚀 Publish to Hub'; pubBtn.disabled = false; }
+
+  // Navigate hub to the published week so admin sees results immediately
+  currentMon = intakeTargetMon;
+
   showToast(msg);
   setAdminMode('hub');
   render();

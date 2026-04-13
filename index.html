@@ -1626,8 +1626,7 @@ ${d.notes.trim()}`);
       id:       'if_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
       hot:      !!d.action,
       approval: false,
-      text:     d.notes.trim().replace(/
-/g, '<br>'),
+      text:     d.notes.trim().replace(/\n/g, '<br>'),
       links:    (d.links || []).filter(l => l.url),
     };
     if (!extra[wk][catName]) extra[wk][catName] = [];
@@ -1668,9 +1667,7 @@ Each briefing should:
 
 Here is this week's intake data for the week of ${weekLabel_str}:
 
-${allRawContent.join('
-
-')}
+${allRawContent.join('\n\n')}
 
 Return ONLY a JSON array with this exact format (no other text, no markdown):
 [
@@ -1814,8 +1811,7 @@ async function generateIntelPreview() {
   IF_SECTIONS.forEach(function(sec) {
     var d = draft[sec.key];
     if (d && d.notes && d.notes.trim()) {
-      allRaw.push('[' + sec.label + ']
-' + d.notes.trim());
+      allRaw.push('[' + sec.label + ']\n' + d.notes.trim());
     }
   });
 
@@ -1829,33 +1825,12 @@ async function generateIntelPreview() {
 
   try {
     var weekLabel_str = weekLabel(intakeTargetMon);
-    var prompt = 'You are the Lens Intelligence engine for SVP (Spectrum Vision Partners) weekly marketing hub.
-' +
-      'Analyze the following weekly intake data and generate 3-5 sharp, strategic intelligence briefings.
-
-' +
-      'Each briefing should:
-' +
-      '- Focus on one key insight, trend, opportunity, or risk
-' +
-      '- Be specific and actionable, not generic
-' +
-      '- Reference actual data points from the intake when possible
-' +
-      '- Have a short category label (e.g. "Paid Media", "Opportunity", "Performance", "Operations", "Creative")
-
-' +
-      'Here is this week's intake data for the week of ' + weekLabel_str + ':
-
-' +
-      allRaw.join('
-
-') + '
-
-' +
-      'Return ONLY a JSON array with this exact format (no other text, no markdown backticks):
-' +
-      '[{"cat": "Category Name", "text": "Intelligence briefing text here."}]';
+    var prompt = 'You are the Lens Intelligence engine for SVP (Spectrum Vision Partners) weekly marketing hub. ' +
+      'Analyze the following weekly intake data and generate 3-5 sharp, strategic intelligence briefings. ' +
+      'Each briefing should: focus on one key insight trend opportunity or risk; be specific and actionable; reference actual data points; have a short category label like Paid Media Opportunity Performance Operations or Creative. ' +
+      'Here is this week intake data for the week of ' + weekLabel_str + ': ' +
+      allRaw.join(' | ') + ' ' +
+      'Return ONLY a JSON array, no other text, no markdown: [{"cat": "Category Name", "text": "Intelligence briefing text."}]';
 
     var response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

@@ -1245,14 +1245,14 @@ let adminMode = 'hub'; // 'hub' | 'intake'
   u.addEventListener('keydown', e => { if(e.key === 'Enter') p.focus(); });
 })();
 
-function togglePw() {
+window.togglePw = function() {
   const p = document.getElementById('lf-password');
   const b = document.getElementById('pw-toggle-btn');
   p.type = p.type === 'password' ? 'text' : 'password';
   b.textContent = p.type === 'password' ? '👁' : '🙈';
 }
 
-function doLogin() {
+window.doLogin = function() {
   const u = document.getElementById('lf-username').value.trim();
   const p = document.getElementById('lf-password').value;
   const err = document.getElementById('lf-err');

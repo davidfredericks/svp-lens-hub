@@ -438,6 +438,24 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 .btn-clr{padding:10px 14px;background:transparent;color:var(--red);border:1px solid #f0cbc8;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;}
 .if-has-content .intake-sec-hdr{background:#0d5247;}
 .if-has-content .intake-sec-title::after{content:' ✓';opacity:.7;}
+/* ── LENS INTELLIGENCE PREVIEW ── */
+.intel-preview-box{background:#fff;border:1px solid var(--gray-border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.intel-preview-hdr{background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.intel-preview-title{color:#fff;font-size:13px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px;}
+.intel-preview-body{padding:18px;}
+.intel-item-edit{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid var(--gray-border);border-radius:9px;margin-bottom:10px;background:#f8fafc;}
+.intel-item-edit:last-child{margin-bottom:0;}
+.intel-cat-badge{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.intel-item-text{font-size:13px;color:var(--text);line-height:1.65;flex:1;}
+.intel-item-actions{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+.btn-intel-edit{padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;border:1px solid var(--gray-border);background:#fff;color:var(--navy2);}
+.btn-intel-del{padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;border:1px solid #f0cbc8;background:#fdf0ef;color:var(--red);}
+.intel-generating{display:flex;align-items:center;gap:10px;padding:18px;font-size:13px;color:var(--muted);font-style:italic;}
+.intel-spinner{width:18px;height:18px;border:2.5px solid #dde1e8;border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-gen-intel{display:flex;align-items:center;gap:7px;padding:9px 18px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;}
+.btn-gen-intel:hover{background:var(--navy2);}
+.btn-gen-intel:disabled{opacity:.5;cursor:wait;}
 
 </style>
 </head>
@@ -468,7 +486,10 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
       </div>
       <div style="margin-bottom:20px;">
         <label class="lf-label">Password</label>
-        <input class="lf-input" id="lf-password" type="password" placeholder="Enter password" autocomplete="off" />
+        <div style="position:relative;">
+          <input class="lf-input" id="lf-password" type="password" placeholder="Enter password" autocomplete="off" style="padding-right:44px;" />
+          <button type="button" id="pw-eye-btn" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:16px;padding:0;line-height:1;">👁</button>
+        </div>
       </div>
       <div id="lf-err" style="display:none;background:#fdf0ef;border:1px solid #f0cbc8;border-radius:7px;padding:9px 13px;font-size:13px;color:#c0392b;margin-bottom:14px;"></div>
       <button id="btn-login" style="width:100%;padding:12px 0;background:#0a1f3c;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">Sign In →</button>
@@ -500,6 +521,52 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
   <div class="modal-body"><div class="modal-section-label">Update text</div><textarea class="edit-item-ta" id="edit-item-ta" rows="5"></textarea><p class="modal-note">Tip: use &lt;strong&gt;text&lt;/strong&gt; for bold.</p></div>
   <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeTextModal()">Cancel</button><button class="btn-modal-save" onclick="saveTextModal()">Save changes</button></div></div>
 </div>
+
+<div class="modal-backdrop" id="add-item-modal" style="display:none;" onclick="if(event.target===this)closeAddItemModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Item</h3>
+      <button class="modal-close" onclick="closeAddItemModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:14px;">
+        <div class="modal-section-label">Category</div>
+        <select id="add-item-cat" style="width:100%;padding:8px 10px;border:1px solid var(--gray-border);border-radius:7px;font-family:inherit;font-size:13px;color:var(--text);">
+          <option>General</option>
+          <option>Provider / Location Campaigns</option>
+          <option>Organic Social Media</option>
+          <option>Blogs &amp; SEO</option>
+          <option>Web</option>
+          <option>Meetings</option>
+          <option>Opportunities</option>
+          <option>New To Discuss</option>
+        </select>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div class="modal-section-label">Update text</div>
+        <textarea class="edit-item-ta" id="add-item-ta" rows="5" placeholder="Enter your update here..."></textarea>
+        <p class="modal-note">Tip: use &lt;strong&gt;text&lt;/strong&gt; for bold.</p>
+      </div>
+      <div style="display:flex;gap:18px;margin-bottom:4px;">
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="add-item-hot" style="width:15px;height:15px;accent-color:var(--teal);" /> Action Needed (Hot Item)
+        </label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="add-item-approval" style="width:15px;height:15px;accent-color:var(--teal);" /> Approval Needed
+        </label>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="modal-section-label">Client prompt (shown to Nancy if hot)</div>
+        <input id="add-item-prompt" style="width:100%;padding:8px 10px;border:1px solid var(--gray-border);border-radius:7px;font-family:inherit;font-size:13px;color:var(--text);" placeholder="e.g. Please confirm approval." />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeAddItemModal()">Cancel</button>
+      <button class="btn-modal-save" onclick="saveAddItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="link-modal" style="display:none;" onclick="if(event.target===this)closeLinkModal()">
   <div class="modal"><div class="modal-header"><h3>Edit Links</h3><button class="modal-close" onclick="closeLinkModal()">&#10005;</button></div>
   <div class="modal-body"><div class="modal-section-label">Current links</div><div id="modal-link-list"></div>
@@ -525,7 +592,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
     </div>
     <div class="hdr-sep"></div>
     <div class="header-right">
-      <button class="btn-new admin-only-elem" onclick="showToast('Use the Intake Form in admin mode to add new items.')">&#43; New Item</button>
+      <button class="btn-new" id="btn-new-item" style="display:none;">&#43; New Item</button>
       <button class="btn-hdr" onclick="render()">&#8635; Refresh</button>
       <button class="btn-hdr" onclick="doLogout()">Sign Out</button>
     </div>
@@ -981,6 +1048,37 @@ function reopenCr(crWk,id){setCrState(crWk,id,{resolved:false});render();}
 function setCrTab(k){activeCrTab=k;render();}
 
 // ── ROW RENDERERS ─────────────────────────────────────────────────────────────
+
+function openAddItemModal(){
+  document.getElementById('add-item-ta').value='';
+  document.getElementById('add-item-hot').checked=false;
+  document.getElementById('add-item-approval').checked=false;
+  document.getElementById('add-item-prompt').value='';
+  document.getElementById('add-item-modal').style.display='flex';
+}
+function closeAddItemModal(){document.getElementById('add-item-modal').style.display='none';}
+function saveAddItem(){
+  const text=document.getElementById('add-item-ta').value.trim();
+  if(!text){showToast('Please enter some text.',true);return;}
+  const catName=document.getElementById('add-item-cat').value;
+  const hot=document.getElementById('add-item-hot').checked;
+  const approval=document.getElementById('add-item-approval').checked;
+  const prompt=document.getElementById('add-item-prompt').value.trim();
+  const wk=weekKey(currentMon);
+  if(!WEEKS[wk]){
+    WEEKS[wk]={label:weekLabel(currentMon),pmKey:null,crKey:null,intelligence:[],
+      categories:['General','Provider / Location Campaigns','Organic Social Media','Blogs & SEO','Web','Meetings','Opportunities','New To Discuss'].map(n=>({name:n,items:[]}))};
+  }
+  const cat=WEEKS[wk].categories.find(c=>c.name===catName);
+  if(!cat){showToast('Category not found.',true);return;}
+  const newId='admin_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+  cat.items.push({id:newId,hot,approval,text,clientPrompt:prompt||undefined,links:[]});
+  closeAddItemModal();
+  openSections.add('cat-'+catName.replace(/[\s\/&]+/g,'-').toLowerCase());
+  render();
+  showToast('✓ Item added to '+catName);
+}
+
 function renderRow(wk,item){
   const st=getItemState(wk,item.id),res=st.resolved;
   let h=`<div class="item-row ${item.hot?(res?'is-done':'is-hot'):''}" id="row-${item.id}">
@@ -1058,9 +1156,15 @@ function render(){
   document.getElementById('pt-week-badge').innerHTML=`&#128197; Week of &nbsp;<strong>${wkLbl}</strong>`;
 
   if(!wd){
-    ['stat-carry','stat-hot','stat-done','stat-total'].forEach(id=>document.getElementById(id).textContent='0');
-    main.innerHTML=`<div class="no-report"><p style="font-size:28px;margin-bottom:12px;opacity:.4;">📋</p><p style="font-size:16px;font-weight:500;color:var(--navy);margin-bottom:8px;">No report for this week</p><p style="font-size:13px;color:var(--muted);">Week of ${wkLbl}</p></div>`;
-    return;
+    // Create an empty week with all standard categories so they always show
+    wd = {
+      label: wkLbl, pmKey: null, crKey: null, intelligence: [],
+      categories: [
+        'General','Provider / Location Campaigns','Organic Social Media',
+        'Blogs & SEO','Web','Meetings','Opportunities','New To Discuss'
+      ].map(n=>({name:n,items:[]}))
+    };
+    WEEKS[weekKey(currentMon)] = wd;
   }
 
   const allItems=wd.categories.flatMap(c=>c.items);
@@ -1200,6 +1304,14 @@ var adminMode = 'hub';
     btn.addEventListener('click', runLogin);
     pEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); runLogin(); } });
     uEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); pEl.focus(); } });
+    // Password visibility toggle
+    var eyeBtn = document.getElementById('pw-eye-btn');
+    if (eyeBtn) {
+      eyeBtn.addEventListener('click', function() {
+        pEl.type = pEl.type === 'password' ? 'text' : 'password';
+        eyeBtn.textContent = pEl.type === 'password' ? '👁' : '🙈';
+      });
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', attempt);
@@ -1237,6 +1349,8 @@ function runLogin() {
       var nl = document.getElementById('anb-user-label');
       if (nb) nb.style.display = 'flex';
       if (nl) nl.textContent = u;
+      var newBtn = document.getElementById('btn-new-item');
+      if (newBtn) { newBtn.style.display = 'flex'; newBtn.onclick = function(){ openAddItemModal(); }; }
     }
     activePmTab = null;
     activeCrTab = null;
@@ -1374,7 +1488,7 @@ function renderIntakeForm() {
       <div class="intake-sec-body" id="if-body-${sec.key}" style="display:none;">`;
 
     if (sec.isPmNote) {
-      html += `<div class="if-pm-note">📌 <strong>Note:</strong> For structured ${sec.label} data (charts, stats, tabs), use <strong>Hub Edit Mode</strong> directly. This section is for free-form notes only.</div><div style="margin-top:12px;">`;
+      html += `<div class="if-pm-note">📌 Paste your raw ${sec.label} data below — Claude will automatically format and generate Lens Intelligence from it when you publish.</div><div style="margin-top:12px;">`;
     }
 
     html += `
@@ -1504,7 +1618,7 @@ async function publishIntakeToHub() {
   if (!WEEKS[wk]) {
     WEEKS[wk] = {
       label: weekLabel(intakeTargetMon),
-      pmKey: wk, crKey: null, intelligence: [],
+      pmKey: null, crKey: null, intelligence: [],
       categories: [
         'General','Provider / Location Campaigns','Organic Social Media',
         'Blogs & SEO','Web','Meetings','Opportunities','New To Discuss'
@@ -1512,19 +1626,28 @@ async function publishIntakeToHub() {
     };
   }
 
-  const extra  = loadExtraItems();
+  const extra = loadExtraItems();
   if (!extra[wk]) extra[wk] = {};
 
   let publishedCount = 0;
-  IF_SECTIONS.filter(s => !s.isPmNote).forEach(sec => {
+  let allRawContent  = [];
+
+  IF_SECTIONS.forEach(sec => {
     const d = draft[sec.key];
     if (!d || !d.notes || !d.notes.trim()) return;
+
+    allRawContent.push(`[${sec.label}]
+${d.notes.trim()}`);
+
+    if (sec.isPmNote) return; // PM/CallRail handled separately via raw display
+
     const catName = sec.catName;
     const newItem = {
       id:       'if_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
       hot:      !!d.action,
       approval: false,
-      text:     d.notes.trim().replace(/\n/g, '<br>'),
+      text:     d.notes.trim().replace(/
+/g, '<br>'),
       links:    (d.links || []).filter(l => l.url),
     };
     if (!extra[wk][catName]) extra[wk][catName] = [];
@@ -1532,20 +1655,273 @@ async function publishIntakeToHub() {
     publishedCount++;
   });
 
-  if (!publishedCount) {
+  if (!publishedCount && allRawContent.length === 0) {
     showToast('Nothing to publish — fill in at least one section first.', true);
     return;
   }
 
+  // Show processing state
+  const pubBtn = document.getElementById('intake-pub-btn');
+  const statusEl = document.getElementById('intake-status');
+  if (pubBtn) { pubBtn.textContent = '⏳ Publishing…'; pubBtn.disabled = true; }
+  if (statusEl) statusEl.textContent = 'Publishing to hub…';
+
+  // Use manually reviewed intel if available, otherwise generate
+  if (_pendingIntel && _pendingIntel.length > 0) {
+    WEEKS[wk].intelligence = JSON.parse(JSON.stringify(_pendingIntel));
+    if (!extra[wk]._meta) extra[wk]._meta = {};
+    extra[wk]._meta.intelligence = WEEKS[wk].intelligence;
+  }
+
+  try {
+    // ── GENERATE LENS INTELLIGENCE VIA CLAUDE API (if none manually set) ──
+    if ((!_pendingIntel || _pendingIntel.length === 0) && allRawContent.length > 0) {
+      const weekLabel_str = weekLabel(intakeTargetMon);
+      const prompt = `You are the Lens Intelligence engine for SVP (Spectrum Vision Partners) weekly marketing hub. 
+Analyze the following weekly intake data and generate 3-5 sharp, strategic intelligence briefings.
+
+Each briefing should:
+- Focus on one key insight, trend, opportunity, or risk
+- Be specific and actionable, not generic
+- Reference actual data points from the intake when possible
+- Have a short category label (e.g. "Paid Media", "Opportunity", "Performance", "Operations", "Creative")
+
+Here is this week's intake data for the week of ${weekLabel_str}:
+
+${allRawContent.join('
+
+')}
+
+Return ONLY a JSON array with this exact format (no other text, no markdown):
+[
+  {"cat": "Category Name", "text": "Intelligence briefing text here."},
+  {"cat": "Category Name", "text": "Another briefing here."}
+]`;
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const raw = data.content && data.content[0] ? data.content[0].text : '[]';
+        try {
+          const clean = raw.replace(/```json|```/g, '').trim();
+          const intel = JSON.parse(clean);
+          if (Array.isArray(intel) && intel.length > 0) {
+            WEEKS[wk].intelligence = intel;
+            if (!extra[wk]._meta) extra[wk]._meta = {};
+            extra[wk]._meta.intelligence = intel;
+          }
+        } catch(e) { console.warn('Intel parse error:', e); }
+      }
+    }
+  } catch(err) {
+    console.warn('Lens Intelligence API error:', err);
+    // Continue without intelligence — don't block publish
+  }
+
+  // Push to Firebase
   const pushed = await pushExtraItemsToFirebase(extra);
+  // Also push intelligence update
+  if (WEEKS[wk].intelligence && WEEKS[wk].intelligence.length > 0) {
+    try {
+      const intelDoc = _db ? _db.collection('svplens').doc('weekIntelligence') : null;
+      if (intelDoc) await intelDoc.set({ [wk]: WEEKS[wk].intelligence });
+    } catch(e) {}
+  }
+
   mergeExtraItems();
+
   const msg = pushed
-    ? `✓ ${publishedCount} section(s) published live — client will see updates immediately!`
-    : `✓ ${publishedCount} section(s) saved locally. Connect Firebase for cross-device sync.`;
+    ? `✓ Published! ${publishedCount} section(s) live${WEEKS[wk].intelligence&&WEEKS[wk].intelligence.length?" + "+WEEKS[wk].intelligence.length+" Lens Intelligence briefings":""}.`
+    : `✓ Saved locally. ${publishedCount} section(s) + Lens Intelligence ready.`;
+
+  if (pubBtn) { pubBtn.textContent = '🚀 Publish to Hub'; pubBtn.disabled = false; }
   showToast(msg);
   setAdminMode('hub');
   render();
 }
+
+
+
+// ── LENS INTELLIGENCE MANAGEMENT ─────────────────────────────────────────────
+// Holds the working intel array while admin is editing the intake form
+var _pendingIntel = []; // [{cat, text}]
+
+function renderIntelPreview() {
+  var body = document.getElementById('intel-preview-body');
+  if (!body) return;
+
+  var html = '';
+
+  // Editable items
+  if (_pendingIntel.length > 0) {
+    _pendingIntel.forEach(function(item, i) {
+      html += '<div class="intel-item-edit">' +
+        '<div style="flex:1;">' +
+          '<div class="intel-cat-badge">' + esc(item.cat) + '</div>' +
+          '<div class="intel-item-text">' + esc(item.text) + '</div>' +
+        '</div>' +
+        '<div class="intel-item-actions">' +
+          '<button class="btn-intel-edit" onclick="editIntelItem(' + i + ')">✏ Edit</button>' +
+          '<button class="btn-intel-del"  onclick="deleteIntelItem(' + i + ')">✕</button>' +
+        '</div>' +
+      '</div>';
+    });
+  } else {
+    html += '<div style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:14px;">No intelligence briefings yet. Generate from your intake data or add one manually below.</div>';
+  }
+
+  // "Add manually" form
+  html += '<div style="border-top:1px dashed var(--gray-border);padding-top:14px;margin-top:10px;">' +
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">Add custom intelligence</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+      '<input id="intel-new-cat" placeholder="Category (e.g. Performance)" style="flex:0 0 180px;padding:8px 10px;border:1.5px solid var(--gray-border);border-radius:7px;font-size:12px;font-family:inherit;color:var(--text);" />' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<textarea id="intel-new-text" rows="2" placeholder="Write your intelligence briefing…" style="flex:1;padding:8px 10px;border:1.5px solid var(--gray-border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;"></textarea>' +
+      '<button onclick="addIntelManual()" style="flex-shrink:0;padding:8px 16px;background:var(--teal);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;align-self:flex-end;">+ Add</button>' +
+    '</div>' +
+  '</div>';
+
+  body.innerHTML = html;
+}
+
+function addIntelManual() {
+  var cat  = (document.getElementById('intel-new-cat')  || {}).value || '';
+  var text = (document.getElementById('intel-new-text') || {}).value || '';
+  cat  = cat.trim();
+  text = text.trim();
+  if (!cat || !text) { showToast('Please enter both a category and briefing text.', true); return; }
+  _pendingIntel.push({ cat: cat, text: text });
+  renderIntelPreview();
+  showToast('✓ Intelligence item added.');
+}
+
+function editIntelItem(i) {
+  var item = _pendingIntel[i];
+  if (!item) return;
+  var newCat  = prompt('Category:', item.cat);
+  if (newCat === null) return;
+  var newText = prompt('Briefing text:', item.text);
+  if (newText === null) return;
+  _pendingIntel[i] = { cat: newCat.trim() || item.cat, text: newText.trim() || item.text };
+  renderIntelPreview();
+  showToast('✓ Intelligence item updated.');
+}
+
+function deleteIntelItem(i) {
+  if (!confirm('Remove this intelligence briefing?')) return;
+  _pendingIntel.splice(i, 1);
+  renderIntelPreview();
+}
+
+async function generateIntelPreview() {
+  var btn = document.getElementById('btn-gen-intel');
+  var body = document.getElementById('intel-preview-body');
+  if (!body) return;
+
+  // Collect current intake content
+  var draft = collectIntakeDraft();
+  var allRaw = [];
+  IF_SECTIONS.forEach(function(sec) {
+    var d = draft[sec.key];
+    if (d && d.notes && d.notes.trim()) {
+      allRaw.push('[' + sec.label + ']
+' + d.notes.trim());
+    }
+  });
+
+  if (allRaw.length === 0) {
+    showToast('Fill in at least one section before generating.', true);
+    return;
+  }
+
+  if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
+  body.innerHTML = '<div class="intel-generating"><div class="intel-spinner"></div>Claude is analyzing your intake data…</div>';
+
+  try {
+    var weekLabel_str = weekLabel(intakeTargetMon);
+    var prompt = 'You are the Lens Intelligence engine for SVP (Spectrum Vision Partners) weekly marketing hub.
+' +
+      'Analyze the following weekly intake data and generate 3-5 sharp, strategic intelligence briefings.
+
+' +
+      'Each briefing should:
+' +
+      '- Focus on one key insight, trend, opportunity, or risk
+' +
+      '- Be specific and actionable, not generic
+' +
+      '- Reference actual data points from the intake when possible
+' +
+      '- Have a short category label (e.g. "Paid Media", "Opportunity", "Performance", "Operations", "Creative")
+
+' +
+      'Here is this week's intake data for the week of ' + weekLabel_str + ':
+
+' +
+      allRaw.join('
+
+') + '
+
+' +
+      'Return ONLY a JSON array with this exact format (no other text, no markdown backticks):
+' +
+      '[{"cat": "Category Name", "text": "Intelligence briefing text here."}]';
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (response.ok) {
+      var data = await response.json();
+      var raw = data.content && data.content[0] ? data.content[0].text : '[]';
+      var clean = raw.replace(/```json|```/g, '').trim();
+      var intel = JSON.parse(clean);
+      if (Array.isArray(intel) && intel.length > 0) {
+        _pendingIntel = intel;
+        showToast('✓ Lens Intelligence generated — review and edit below.');
+      } else {
+        showToast('Generated but got unexpected format. Try again.', true);
+      }
+    } else {
+      showToast('API error generating intelligence. You can add items manually.', true);
+    }
+  } catch(err) {
+    console.warn('Intel generation error:', err);
+    showToast('Could not reach Claude API. Add items manually below.', true);
+  }
+
+  if (btn) { btn.textContent = '⚡ Re-generate'; btn.disabled = false; }
+  renderIntelPreview();
+}
+
+// Initialize intel preview when switching to intake mode
+var _origSetAdminMode = setAdminMode;
+setAdminMode = function(mode) {
+  _origSetAdminMode(mode);
+  if (mode === 'intake') {
+    // Load existing intel for current target week if any
+    var wk = weekKey(intakeTargetMon);
+    _pendingIntel = (WEEKS[wk] && WEEKS[wk].intelligence) ? JSON.parse(JSON.stringify(WEEKS[wk].intelligence)) : [];
+    renderIntelPreview();
+  }
+};
+
 
 // Call mergeExtraItems early so published items are always loaded
 // (happens after WEEKS is defined, called from doLogin → render)
@@ -1576,11 +1952,27 @@ async function publishIntakeToHub() {
     <div class="intake-body" id="intake-sections-body">
       <!-- Rendered by JS -->
     </div>
+    <!-- Lens Intelligence Preview -->
+    <div class="intake-body" style="padding-top:0;padding-bottom:0;">
+      <div class="intel-preview-box" id="intel-preview-box">
+        <div class="intel-preview-hdr">
+          <div class="intel-preview-title">
+            🧠 Lens Intelligence Preview
+            <span style="font-size:10px;font-weight:400;opacity:.55;font-style:italic;">Generated by Claude — review before publishing</span>
+          </div>
+          <button class="btn-gen-intel" id="btn-gen-intel" onclick="generateIntelPreview()">⚡ Generate</button>
+        </div>
+        <div class="intel-preview-body" id="intel-preview-body">
+          <div style="font-size:13px;color:var(--muted);font-style:italic;">Fill in your intake sections above, then click Generate to preview your Lens Intelligence briefings before publishing.</div>
+        </div>
+      </div>
+    </div>
+
     <div class="intake-sticky-bar">
       <span class="status-text" id="intake-status">Fill in your updates, then publish to the hub.</span>
       <button class="btn-clr" onclick="clearIntakeForm()">🗑 Clear</button>
       <button class="btn-save-draft" onclick="saveIntakeDraft()">💾 Save Draft</button>
-      <button class="btn-publish" onclick="publishIntakeToHub()">🚀 Publish to Hub</button>
+      <button class="btn-publish" id="intake-pub-btn" onclick="publishIntakeToHub()">🚀 Publish to Hub</button>
     </div>
   </div>
 

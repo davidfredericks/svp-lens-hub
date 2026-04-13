@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -462,18 +463,15 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
     </div>
     <div class="login-body">
       <div style="margin-bottom:16px;">
-        <label class="lf-label" for="lf-username">Username</label>
-        <input class="lf-input" id="lf-username" type="text" placeholder="Enter username" autocomplete="username" />
+        <label class="lf-label">Username</label>
+        <input class="lf-input" id="lf-username" type="text" placeholder="Enter username" autocomplete="off" spellcheck="false" />
       </div>
       <div style="margin-bottom:20px;">
-        <label class="lf-label" for="lf-password">Password</label>
-        <div class="lf-pw-wrap">
-          <input class="lf-input" id="lf-password" type="password" placeholder="Enter password" autocomplete="current-password" />
-          <button class="lf-toggle-pw" onclick="togglePw()" id="pw-toggle-btn" type="button">👁</button>
-        </div>
+        <label class="lf-label">Password</label>
+        <input class="lf-input" id="lf-password" type="password" placeholder="Enter password" autocomplete="off" />
       </div>
-      <div class="lf-err" id="lf-err" style="display:none;"></div>
-      <button class="btn-login" id="btn-login" onclick="doLogin()" >Sign In →</button>
+      <div id="lf-err" style="display:none;background:#fdf0ef;border:1px solid #f0cbc8;border-radius:7px;padding:9px 13px;font-size:13px;color:#c0392b;margin-bottom:14px;"></div>
+      <button id="btn-login" style="width:100%;padding:12px 0;background:#0a1f3c;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">Sign In →</button>
     </div>
   </div>
 </div>
@@ -576,54 +574,12 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 //  FIREBASE CONFIG — paste your values from Firebase Console here
 // ═══════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey:           const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXX",
-  authDomain: "svp-lens-hub.firebaseapp.com",
-  projectId: "svp-lens-hub",
-  storageBucket: "svp-lens-hub.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
-};,
-  authDomain:       const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXX",
-  authDomain: "svp-lens-hub.firebaseapp.com",
-  projectId: "svp-lens-hub",
-  storageBucket: "svp-lens-hub.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
-};,
-  projectId:         const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXX",
-  authDomain: "svp-lens-hub.firebaseapp.com",
-  projectId: "svp-lens-hub",
-  storageBucket: "svp-lens-hub.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
-};,
-  storageBucket:     const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXX",
-  authDomain: "svp-lens-hub.firebaseapp.com",
-  projectId: "svp-lens-hub",
-  storageBucket: "svp-lens-hub.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
-};,
-  messagingSenderId: const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXX",
-  authDomain: "svp-lens-hub.firebaseapp.com",
-  projectId: "svp-lens-hub",
-  storageBucket: "svp-lens-hub.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
-};,
-  appId:             const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXX",
-  authDomain: "svp-lens-hub.firebaseapp.com",
-  projectId: "svp-lens-hub",
-  storageBucket: "svp-lens-hub.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
-};,
+  apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+  authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+  projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+  storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId:             "REPLACE_WITH_YOUR_APP_ID",
 };
 // ═══════════════════════════════════════════════════════════════
 
@@ -1225,92 +1181,103 @@ function setPmTab(k){activePmTab=k;render();}
 // ════════════════════════════════════════════════════════════════════════════
 //  AUTH & MODE MANAGEMENT
 // ════════════════════════════════════════════════════════════════════════════
-const USERS_AUTH = {
+var USERS_AUTH = {
   'NFSVP':    { password: 'Vision',     role: 'client', display: 'Nancy Fairbrother' },
-  'MDGADMIN': { password: 'SVPHotlist', role: 'admin',  display: 'Admin (MDG)'       },
+  'MDGADMIN': { password: 'SVPHotlist', role: 'admin',  display: 'Admin (MDG)'       }
 };
 
-let currentUser = null;
-let adminMode = 'hub'; // 'hub' | 'intake'
+var currentUser = null;
+var adminMode = 'hub';
 
-// Live enable/disable login button
-(function(){
-  const u = document.getElementById('lf-username');
-  const p = document.getElementById('lf-password');
-  const b = document.getElementById('btn-login');
-  function check(){ b.disabled = !u.value.trim() || !p.value; }
-  u.addEventListener('input', check);
-  p.addEventListener('input', check);
-  p.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
-  u.addEventListener('keydown', e => { if(e.key === 'Enter') p.focus(); });
+// Wire login button via addEventListener — no inline onclick needed
+(function setupLogin() {
+  function attempt() {
+    var btn = document.getElementById('btn-login');
+    var uEl = document.getElementById('lf-username');
+    var pEl = document.getElementById('lf-password');
+    if (!btn || !uEl || !pEl) { setTimeout(attempt, 100); return; }
+
+    btn.addEventListener('click', runLogin);
+    pEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); runLogin(); } });
+    uEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); pEl.focus(); } });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attempt);
+  } else {
+    attempt();
+  }
 })();
 
-window.togglePw = function() {
-  const p = document.getElementById('lf-password');
-  const b = document.getElementById('pw-toggle-btn');
-  p.type = p.type === 'password' ? 'text' : 'password';
-  b.textContent = p.type === 'password' ? '👁' : '🙈';
-}
+function runLogin() {
+  var uEl  = document.getElementById('lf-username');
+  var pEl  = document.getElementById('lf-password');
+  var eEl  = document.getElementById('lf-err');
+  var bEl  = document.getElementById('btn-login');
 
-window.doLogin = function() {
-  const u = document.getElementById('lf-username').value.trim();
-  const p = document.getElementById('lf-password').value;
-  const err = document.getElementById('lf-err');
-  const btn = document.getElementById('btn-login');
+  var u = uEl ? uEl.value.trim() : '';
+  var p = pEl ? pEl.value : '';
 
-  btn.disabled = true;
-  btn.textContent = 'Signing in…';
-  err.style.display = 'none';
+  if (!u || !p) {
+    if (eEl) { eEl.textContent = 'Please enter your username and password.'; eEl.style.display = 'block'; }
+    return;
+  }
 
-  setTimeout(() => {
-    const user = USERS_AUTH[u];
-    if (user && user.password === p) {
-      currentUser = { username: u, role: user.role, display: user.display };
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
+  if (bEl) { bEl.textContent = 'Signing in…'; bEl.style.opacity = '0.6'; }
+  if (eEl) eEl.style.display = 'none';
 
-      if (user.role === 'admin') {
-        document.getElementById('admin-nav-bar').style.display = 'flex';
-        document.getElementById('anb-user-label').textContent = u;
-        // Apply admin-only element visibility
-        document.querySelectorAll('.admin-only-elem').forEach(el => el.style.display = '');
-      } else {
-        // Client: hide admin-only elements after render
-        document.querySelectorAll('.admin-only-elem').forEach(el => el.style.display = 'none');
-      }
-
-      activePmTab = null;
-      activeCrTab = null;
-      initIntakeWeek();
-      initFirebase();
-      render();
-    } else {
-      err.textContent = '⚠ Incorrect username or password.';
-      err.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Sign In →';
+  var user = USERS_AUTH[u];
+  if (user && user.password === p) {
+    currentUser = { username: u, role: user.role, display: user.display };
+    var ls = document.getElementById('login-screen');
+    var ap = document.getElementById('app');
+    if (ls) ls.style.display = 'none';
+    if (ap) ap.style.display = 'block';
+    if (user.role === 'admin') {
+      var nb = document.getElementById('admin-nav-bar');
+      var nl = document.getElementById('anb-user-label');
+      if (nb) nb.style.display = 'flex';
+      if (nl) nl.textContent = u;
     }
-  }, 450);
+    activePmTab = null;
+    activeCrTab = null;
+    initIntakeWeek();
+    initFirebase();
+    render();
+  } else {
+    if (eEl) { eEl.textContent = '⚠ Incorrect username or password.'; eEl.style.display = 'block'; }
+    if (bEl) { bEl.textContent = 'Sign In →'; bEl.style.opacity = '1'; }
+  }
 }
+
+// Keep doLogin as alias so any remaining inline refs still work
+function doLogin() { runLogin(); }
 
 function doLogout() {
   currentUser = null;
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('admin-nav-bar').style.display = 'none';
-  document.getElementById('lf-username').value = '';
-  document.getElementById('lf-password').value = '';
-  document.getElementById('lf-err').style.display = 'none';
-  document.getElementById('btn-login').disabled = true;
-  document.getElementById('btn-login').textContent = 'Sign In →';
+  var ls = document.getElementById('login-screen');
+  var ap = document.getElementById('app');
+  var nb = document.getElementById('admin-nav-bar');
+  var uEl = document.getElementById('lf-username');
+  var pEl = document.getElementById('lf-password');
+  var eEl = document.getElementById('lf-err');
+  var bEl = document.getElementById('btn-login');
+  if (ls) ls.style.display = 'flex';
+  if (ap) ap.style.display = 'none';
+  if (nb) nb.style.display = 'none';
+  if (uEl) uEl.value = '';
+  if (pEl) pEl.value = '';
+  if (eEl) eEl.style.display = 'none';
+  if (bEl) { bEl.textContent = 'Sign In →'; bEl.style.opacity = '1'; }
 }
 
 function setAdminMode(mode) {
   adminMode = mode;
-  document.getElementById('hub-view').style.display    = mode === 'hub'    ? 'block' : 'none';
-  document.getElementById('intake-view').style.display = mode === 'intake' ? 'block' : 'none';
-  document.querySelectorAll('.anb-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.mode === mode);
+  var hv = document.getElementById('hub-view');
+  var iv = document.getElementById('intake-view');
+  if (hv) hv.style.display = mode === 'hub'    ? 'block' : 'none';
+  if (iv) iv.style.display = mode === 'intake' ? 'block' : 'none';
+  document.querySelectorAll('.anb-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.mode === mode);
   });
   if (mode === 'intake') renderIntakeForm();
 }

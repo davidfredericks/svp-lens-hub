@@ -917,7 +917,10 @@ const WEEKS={
 const ALL_WKS=Object.keys(WEEKS).sort();
 let store=loadStore();
 
-let currentMon=getMondayOf('2026-03-30'),activePmTab=null,activeCrTab=null;
+// Default to the latest week with data, or current real week
+var _latestWk = Object.keys(WEEKS).sort().pop();
+var _defaultMon = _latestWk ? getMondayOf(_latestWk.replace('week_','')) : getMondayOf(new Date().toISOString().slice(0,10));
+let currentMon=_defaultMon,activePmTab=null,activeCrTab=null;
 
 function getItemState(wk,id){if(!store[wk])store[wk]={};if(!store[wk][id])store[wk][id]={resolved:false,clientResponse:''};return store[wk][id];}
 function setItemState(wk,id,patch){Object.assign(getItemState(wk,id),patch);saveStore(store);}
@@ -1151,7 +1154,9 @@ function openAndScrollTo(sId,itemId){
 // ── MAIN RENDER ───────────────────────────────────────────────────────────────
 function render(){
   mergeExtraItems();
-  const wk=weekKey(currentMon),wd=WEEKS[wk],main=document.getElementById('main-content'),wkLbl=weekLabel(currentMon);
+  const wk=weekKey(currentMon),wkLbl=weekLabel(currentMon);
+  let wd=WEEKS[wk];
+  const main=document.getElementById('main-content');
   document.getElementById('week-display').textContent=wkLbl;
   document.getElementById('pt-week-badge').innerHTML=`&#128197; Week of &nbsp;<strong>${wkLbl}</strong>`;
 

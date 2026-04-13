@@ -1293,32 +1293,7 @@ var USERS_AUTH = {
 var currentUser = null;
 var adminMode = 'hub';
 
-// Wire login button via addEventListener — no inline onclick needed
-(function setupLogin() {
-  function attempt() {
-    var btn = document.getElementById('btn-login');
-    var uEl = document.getElementById('lf-username');
-    var pEl = document.getElementById('lf-password');
-    if (!btn || !uEl || !pEl) { setTimeout(attempt, 100); return; }
-
-    btn.addEventListener('click', runLogin);
-    pEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); runLogin(); } });
-    uEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); pEl.focus(); } });
-    // Password visibility toggle
-    var eyeBtn = document.getElementById('pw-eye-btn');
-    if (eyeBtn) {
-      eyeBtn.addEventListener('click', function() {
-        pEl.type = pEl.type === 'password' ? 'text' : 'password';
-        eyeBtn.textContent = pEl.type === 'password' ? '👁' : '🙈';
-      });
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attempt);
-  } else {
-    attempt();
-  }
-})();
+// Login wired in separate script block below — see end of body
 
 function runLogin() {
   var uEl  = document.getElementById('lf-username');
@@ -1977,6 +1952,108 @@ setAdminMode = function(mode) {
   </div>
 
 </div><!-- /app -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STANDALONE LOGIN SCRIPT — isolated from all other JS
+     Runs independently so a main-script error can't kill it
+═══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  var CREDS = {
+    'NFSVP':    { password: 'Vision',     role: 'client' },
+    'MDGADMIN': { password: 'SVPHotlist', role: 'admin'  }
+  };
+
+  function wireLogin() {
+    var btn   = document.getElementById('btn-login');
+    var uEl   = document.getElementById('lf-username');
+    var pEl   = document.getElementById('lf-password');
+    var eye   = document.getElementById('pw-eye-btn');
+    var errEl = document.getElementById('lf-err');
+
+    if (!btn || !uEl || !pEl) {
+      setTimeout(wireLogin, 150);
+      return;
+    }
+
+    // Password eye toggle — works standalone
+    if (eye) {
+      eye.addEventListener('click', function() {
+        pEl.type = pEl.type === 'password' ? 'text' : 'password';
+        eye.textContent = pEl.type === 'password' ? '\u{1F441}' : '\u{1F648}';
+      });
+    }
+
+    function attemptLogin() {
+      var u = uEl.value.trim();
+      var p = pEl.value;
+
+      if (!u || !p) {
+        if (errEl) { errEl.textContent = 'Please enter your username and password.'; errEl.style.display = 'block'; }
+        return;
+      }
+
+      var match = CREDS[u];
+      if (match && match.password === p) {
+        // Credentials valid — hand off to main app if loaded, or direct DOM swap
+        if (typeof runLogin === 'function') {
+          runLogin();
+        } else {
+          // Fallback: direct DOM manipulation if main script hasn't loaded
+          var ls = document.getElementById('login-screen');
+          var ap = document.getElementById('app');
+          var nb = document.getElementById('admin-nav-bar');
+          if (ls) ls.style.display = 'none';
+          if (ap) ap.style.display = 'block';
+          if (match.role === 'admin' && nb) {
+            nb.style.display = 'flex';
+            var lbl = document.getElementById('anb-user-label');
+            if (lbl) lbl.textContent = u;
+          }
+          // Try to kick off render
+          if (typeof render === 'function') {
+            if (typeof currentUser !== 'undefined') {
+              currentUser = { username: u, role: match.role, display: u };
+            }
+            if (typeof activePmTab !== 'undefined') activePmTab = null;
+            if (typeof activeCrTab !== 'undefined') activeCrTab = null;
+            if (typeof initIntakeWeek === 'function') initIntakeWeek();
+            if (typeof initFirebase  === 'function') initFirebase();
+            render();
+          }
+        }
+      } else {
+        if (errEl) { errEl.textContent = '\u26a0 Incorrect username or password.'; errEl.style.display = 'block'; }
+        btn.textContent = 'Sign In \u2192';
+        btn.style.opacity = '1';
+      }
+    }
+
+    btn.addEventListener('click', function() {
+      btn.textContent = 'Signing in\u2026';
+      btn.style.opacity = '0.6';
+      if (errEl) errEl.style.display = 'none';
+      setTimeout(attemptLogin, 300);
+    });
+
+    pEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); btn.click(); }
+    });
+
+    uEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); pEl.focus(); }
+    });
+  }
+
+  // Run immediately or after DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireLogin);
+  } else {
+    wireLogin();
+  }
+})();
+</script>
 
 </body>
 </html>

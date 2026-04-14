@@ -1105,6 +1105,7 @@ function renderRow(wk,item){
       <div class="item-tags">
         <span class="tag" style="background:#e8f0fa;color:#1a3a6a;border:1px solid #b8d0ea;font-size:9px;">${WEEKS[wk]?WEEKS[wk].label:wk}</span>
         ${item.hot&&!res?`<span class="tag action">${item.approval?'Approval Needed':'Action Needed'}</span>`:''}
+        ${!item.hot&&!res?`<span class="tag" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac;font-size:9px;">Update</span>`:''}
         ${res?`<span class="tag done-tag">&#10003; Resolved</span>`:''}
       </div>
       <div class="item-text">${item.text}</div>`;
@@ -1173,9 +1174,11 @@ function openAndScrollTo(sId,itemId){
 // ── MAIN RENDER ───────────────────────────────────────────────────────────────
 
 function doRefresh() {
-  const btn = document.querySelector('.btn-hdr[onclick="doRefresh()"]');
+  const btn = document.querySelector('[onclick="doRefresh()"]');
   if (btn) { btn.textContent = '⏳'; btn.style.opacity = '0.5'; }
-  // Re-fetch from Firebase if available
+  // Reload resolved state from localStorage
+  store = loadStore();
+  // Re-fetch extra items from Firebase
   loadExtraItemsFromFirebase().then(function() {
     mergeExtraItems();
     render();
@@ -1310,8 +1313,8 @@ function highlightItem(id){
   for(const cat of curWd.categories){if(cat.items.find(i=>i.id===id)){sId='cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase();break;}}
   if(sId)openAndScrollTo(sId,id);
 }
-async function submitComment(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);if(!ta)return;const msg=ta.value.trim();if(!msg)return;setItemState(wk,id,{clientResponse:msg});await sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg,action_type:'Comment added'});showToast('✓ Comment saved — Christine & David have been notified.');render();}
-async function resolveItem(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);const msg=ta?ta.value.trim():'';setItemState(wk,id,{resolved:true,clientResponse:msg});await sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg||'(no comment)',action_type:'Item resolved ✓'});showToast('✓ Item resolved — Christine & David have been notified.');render();}
+async function submitComment(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);if(!ta)return;const msg=ta.value.trim();if(!msg)return;setItemState(wk,id,{clientResponse:msg});render();showToast('✓ Comment saved.');sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg,action_type:'Comment added'});}
+async function resolveItem(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);const msg=ta?ta.value.trim():'';setItemState(wk,id,{resolved:true,clientResponse:msg});render();showToast('✓ Item resolved.');sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg||'(no comment)',action_type:'Item resolved ✓'});}
 function reopenItem(wk,id){setItemState(wk,id,{resolved:false});render();}
 function changeWeek(dir,jumpToKey){if(jumpToKey)currentMon=getMondayOf(jumpToKey.replace('week_',''));else currentMon=addWeeks(currentMon,dir);render();}
 function setPmTab(k){activePmTab=k;render();}
@@ -1653,7 +1656,9 @@ function collectIntakeDraft() {
           const ta = el.querySelector('.if-item-ta');
           const text = ta ? ta.value.trim() : '';
           if (!text) return; // skip empty items
-          const activeType = el.querySelector('.if-type-btn.active-action') ? 'action' : 'update';
+          // Check which type button is active
+          const actionBtn = el.querySelector('[data-itype="action"]');
+          const activeType = (actionBtn && (actionBtn.classList.contains('active-action'))) ? 'action' : 'update';
           items.push({ text, type: activeType });
         });
       }
@@ -1855,9 +1860,13 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
   if (pubBtn) { pubBtn.textContent = '🚀 Publish to Hub'; pubBtn.disabled = false; }
 
   // Navigate hub to the published week so admin sees results immediately
-  currentMon = intakeTargetMon;
+  currentMon = new Date(intakeTargetMon.getTime()); // clone to avoid reference issues
 
-  showToast(msg);
+  // Force a fresh merge so new items are definitely in WEEKS before render
+  mergeExtraItems();
+
+  const pubWkLabel = weekLabel(currentMon);
+  showToast(msg + ' Viewing week of ' + pubWkLabel);
   setAdminMode('hub');
   render();
 }

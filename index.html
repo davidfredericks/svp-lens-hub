@@ -1543,8 +1543,8 @@ function renderIfItem(secKey, idx, item) {
     <button class="if-item-del" onclick="removeIfItemEl('${secKey}',${idx})">✕</button>
     <div class="if-item-header">
       <div class="if-item-type">
-        <button type="button" class="if-type-btn${type==='update'?' active-update':''}" onclick="setIfItemType('${secKey}',${idx},'update')">Update</button>
-        <button type="button" class="if-type-btn${type==='action'?' active-action':''}" onclick="setIfItemType('${secKey}',${idx},'action')">Action Needed</button>
+        <button type="button" data-itype="update" class="if-type-btn${type==='update'?' active-update':''}" onclick="setIfItemType('${secKey}',${idx},'update')">Update</button>
+        <button type="button" data-itype="action" class="if-type-btn${type==='action'?' active-action':''}" onclick="setIfItemType('${secKey}',${idx},'action')">Action Needed</button>
       </div>
     </div>
     <textarea class="if-item-ta" id="if-item-ta-${secKey}-${idx}" placeholder="Describe this update or action…">${esc(text)}</textarea>
@@ -1574,8 +1574,9 @@ function setIfItemType(secKey, idx, type) {
   const item = document.getElementById('if-item-' + secKey + '-' + idx);
   if (!item) return;
   item.querySelectorAll('.if-type-btn').forEach(b => {
+    const bType = b.getAttribute('data-itype');
     b.className = 'if-type-btn';
-    if (b.textContent.trim().toLowerCase().replace(' ','') === type.replace(' ','')) {
+    if (bType === type) {
       b.className += type === 'update' ? ' active-update' : ' active-action';
     }
   });
@@ -1589,7 +1590,7 @@ function renumberIfItems(secKey) {
     el.querySelectorAll('[id*="if-item-ta-"]').forEach(ta => { ta.id = 'if-item-ta-' + secKey + '-' + i; });
     el.querySelectorAll('.if-item-del').forEach(b => { b.setAttribute('onclick', `removeIfItemEl('${secKey}',${i})`); });
     el.querySelectorAll('.if-type-btn').forEach(b => {
-      const t = b.textContent.trim().toLowerCase() === 'update' ? 'update' : 'action';
+      const t = b.getAttribute('data-itype') || (b.textContent.trim().toLowerCase() === 'update' ? 'update' : 'action');
       b.setAttribute('onclick', `setIfItemType('${secKey}',${i},'${t}')`);
     });
   });

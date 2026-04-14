@@ -1292,8 +1292,12 @@ function render(){
       }
     }
     const hotCount=active.filter(i=>i.hot).length+activeCarry.filter(co=>co.item.hot).length;
+    const updateCount=active.filter(i=>!i.hot).length+activeCarry.filter(co=>!co.item.hot).length;
     const totalCount=cat.items.length+catCarryovers.length;
-    const meta=totalCount===0?'No updates':`${totalCount} update${totalCount!==1?'s':''}${hotCount>0?` · <span style="color:var(--red);font-weight:600;">${hotCount} action${hotCount>1?'s':''}</span>`:''}`;
+    const metaParts=[];
+    if(updateCount>0) metaParts.push(`${updateCount} update${updateCount!==1?'s':''}`);
+    if(hotCount>0) metaParts.push(`<span style="color:var(--red);font-weight:600;">${hotCount} action${hotCount!==1?'s':''}</span>`);
+    const meta=totalCount===0?'No updates this week':metaParts.length>0?metaParts.join(' · '):'No open items';
     html+=makeCollapsible('cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase(),cat.name,meta,inner,'navy');
   });
   html+=`</div>`;

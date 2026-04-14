@@ -929,7 +929,9 @@ const WEEKS={
   }
 };
 
-const ALL_WKS=Object.keys(WEEKS).sort();
+// ALL_WKS rebuilt dynamically so intake-published weeks are included
+function getAllWks() { return Object.keys(WEEKS).sort(); }
+const ALL_WKS=getAllWks(); // initial value — rebuilt in getCarryovers
 let store=loadStore();
 
 // Default to the latest week with data, or current real week
@@ -947,7 +949,7 @@ function parseApps(str){const m=(str||'').match(/(\d+)\/(\d+)/);if(!m)return nul
 
 function getCarryovers(curWk){
   const out=[];
-  for(const wk of ALL_WKS){
+  for(const wk of getAllWks()){
     if(wk>=curWk)continue;
     const wd=WEEKS[wk];if(!wd)continue;
     for(const cat of wd.categories){
@@ -963,7 +965,7 @@ function getCarryovers(curWk){
 
 function getAllHotCarryovers(curWk){
   const out=[];
-  for(const wk of ALL_WKS){
+  for(const wk of getAllWks()){
     if(wk>=curWk)continue;
     const wd=WEEKS[wk];if(!wd)continue;
     for(const cat of wd.categories){
@@ -1214,7 +1216,12 @@ function render(){
   const carryovers=getCarryovers(wk);
 
   const totalActionItems=openHot.length+carryovers.length;
-  const totalResolved=resolvedHot.length;
+  // Count resolved carryovers too (items from past weeks resolved THIS session)
+  const resolvedCarryovers=carryovers.length>0?carryovers.filter(co=>getItemState(co.wk,co.id).resolved):[];
+  // getAllHotCarryovers gives ALL past hot items so we can count resolved ones
+  const allPastHot=getAllHotCarryovers(wk);
+  const resolvedFromPast=allPastHot.filter(co=>getItemState(co.wk,co.id).resolved);
+  const totalResolved=resolvedHot.length+resolvedFromPast.length;
 
   document.getElementById('stat-carry').textContent=carryovers.length;
   document.getElementById('stat-hot').textContent=totalActionItems;
@@ -1239,7 +1246,7 @@ function render(){
       const plain=item.text.replace(/<[^>]+>/g,'');
       let sId='';
       for(const cat of wd.categories){if(cat.items.find(i=>i.id===item.id)){sId='cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase();break;}}
-      html+=`<div class="sum-item"><div class="sum-dot"></div><div class="sum-inner"><div class="sum-meta">${item.approval?'Approval Needed':'Action Needed'}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><button class="sum-go" onclick="openAndScrollTo('${sId}','${item.id}')">↓ Go</button></div>`;
+      html+=`<div class="sum-item"><div class="sum-dot"></div><div class="sum-inner"><div class="sum-meta">${WEEKS[wk]?WEEKS[wk].label:wk}${item.approval?' — Approval Needed':''}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><button class="sum-go" onclick="openAndScrollTo('${sId}','${item.id}')">↓ Go</button></div>`;
     } else {
       const plain=co.text.replace(/<[^>]+>/g,'');
       const sId='cat-'+co.catName.replace(/[\s\/&]+/g,'-').toLowerCase();

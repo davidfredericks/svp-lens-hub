@@ -291,7 +291,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
   .header-center{order:10;width:100%;justify-content:center;
     padding:7px 0 3px;border-top:1px solid rgba(255,255,255,.12);margin-top:2px;}
   .hdr-sep{display:none;}
-  .btn-hdr{display:none;}
+  .btn-hdr{display:flex;font-size:11px;padding:5px 10px;}
   .brand-name{font-size:14px;}
   .brand-sub{display:none;}
   .logo-mark{width:36px;height:36px;}
@@ -387,7 +387,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 .btn-login:disabled{opacity:.4;cursor:default;}
 
 /* ── ADMIN NAV BAR ─────────────────────────────────────────── */
-#admin-nav-bar{background:#111827;border-bottom:2px solid var(--teal);padding:0 28px;display:flex;align-items:center;gap:10px;height:46px;position:sticky;top:0;z-index:300;}
+#admin-nav-bar{background:#111827;border-bottom:2px solid var(--teal);padding:0 12px;display:flex;align-items:center;gap:8px;height:46px;position:sticky;top:0;z-index:300;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .anb-label{color:rgba(255,255,255,.35);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-right:6px;white-space:nowrap;}
 .anb-btn{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;font-family:inherit;transition:all .15s;white-space:nowrap;}
 .anb-btn:hover{color:#fff;border-color:rgba(255,255,255,.35);}
@@ -414,7 +414,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 .iwn-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;margin-top:3px;letter-spacing:.04em;}
 .iwn-badge.existing{background:var(--teal-light);color:var(--teal);}
 .iwn-badge.new-week{background:#fff3cd;color:#8a6000;border:1px solid #f0d898;}
-.intake-body{max-width:880px;margin:0 auto;padding:22px 28px 100px;}
+.intake-body{max-width:880px;margin:0 auto;padding:22px 20px 120px;}
 .intake-sec{background:#fff;border:1px solid var(--gray-border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
 .intake-sec-hdr{background:var(--navy2);padding:11px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
 .intake-sec-title{color:#fff;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
@@ -429,7 +429,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 .if-link-in{padding:7px 10px;border:1.5px solid var(--gray-border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text);outline:none;box-sizing:border-box;}
 .if-link-in:focus{border-color:var(--teal);}
 .if-pm-note{background:var(--purple-light);border-left:3px solid var(--purple-mid);border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;color:#3a1f70;line-height:1.6;}
-.intake-sticky-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--gray-border);padding:12px 28px;display:flex;align-items:center;gap:10px;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,.07);}
+.intake-sticky-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--gray-border);padding:10px 14px;display:flex;align-items:center;gap:8px;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,.07);flex-wrap:wrap;}
 .intake-sticky-bar .status-text{font-size:12px;color:var(--muted);margin-right:auto;}
 .btn-publish{padding:10px 24px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
 .btn-publish:hover{background:#135f55;}
@@ -456,6 +456,21 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 .btn-gen-intel{display:flex;align-items:center;gap:7px;padding:9px 18px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;}
 .btn-gen-intel:hover{background:var(--navy2);}
 .btn-gen-intel:disabled{opacity:.5;cursor:wait;}
+
+
+/* Intake individual items */
+.if-item{background:#f8fafc;border:1.5px solid var(--gray-border);border-radius:9px;padding:13px 14px;margin-bottom:10px;position:relative;}
+.if-item:last-of-type{margin-bottom:0;}
+.if-item-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.if-item-type{display:flex;gap:0;border:1px solid var(--gray-border);border-radius:6px;overflow:hidden;}
+.if-type-btn{padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:#fff;color:var(--muted);transition:all .15s;}
+.if-type-btn.active-update{background:var(--teal);color:#fff;}
+.if-type-btn.active-action{background:var(--red);color:#fff;}
+.if-item-ta{width:100%;padding:8px 10px;border:1.5px solid var(--gray-border);border-radius:7px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;min-height:70px;line-height:1.65;outline:none;box-sizing:border-box;}
+.if-item-ta:focus{border-color:var(--teal);}
+.if-item-del{position:absolute;top:10px;right:10px;background:#fdf0ef;border:1px solid #f0cbc8;border-radius:6px;color:var(--red);cursor:pointer;font-size:12px;padding:3px 8px;font-weight:600;}
+.if-add-item-btn{width:100%;padding:8px;background:transparent;border:1.5px dashed var(--gray-border);border-radius:8px;color:var(--teal);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .15s;}
+.if-add-item-btn:hover{background:var(--teal-light);border-color:var(--teal);}
 
 </style>
 </head>
@@ -593,8 +608,8 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
     <div class="hdr-sep"></div>
     <div class="header-right">
       <button class="btn-new" id="btn-new-item" style="display:none;">&#43; New Item</button>
-      <button class="btn-hdr" onclick="render()">&#8635; Refresh</button>
-      <button class="btn-hdr" onclick="doLogout()">Sign Out</button>
+      <button class="btn-hdr" onclick="doRefresh()">&#8635; Refresh</button>
+      <button class="btn-hdr" id="header-signout" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
 </header>
@@ -1087,7 +1102,11 @@ function renderRow(wk,item){
   let h=`<div class="item-row ${item.hot?(res?'is-done':'is-hot'):''}" id="row-${item.id}">
     <div class="item-bullet ${item.hot?(res?'done':'hot'):'normal'}"></div>
     <div class="item-content">
-      <div class="item-tags">${item.hot&&!res?`<span class="tag action">${item.approval?'Approval Needed':'Action Needed'}</span>`:''}${res?`<span class="tag done-tag">&#10003; Resolved</span>`:''}</div>
+      <div class="item-tags">
+        <span class="tag" style="background:#e8f0fa;color:#1a3a6a;border:1px solid #b8d0ea;font-size:9px;">${WEEKS[wk]?WEEKS[wk].label:wk}</span>
+        ${item.hot&&!res?`<span class="tag action">${item.approval?'Approval Needed':'Action Needed'}</span>`:''}
+        ${res?`<span class="tag done-tag">&#10003; Resolved</span>`:''}
+      </div>
       <div class="item-text">${item.text}</div>`;
   if(item.note)h+=`<div class="item-note">&#128204; <strong>Note:</strong> ${item.note}</div>`;
   if(item.approveCaption)h+=`<div class="approve-block"><div class="approve-label">Proposed Copy — Awaiting Approval</div>${item.approveCaption}</div>`;
@@ -1152,6 +1171,19 @@ function openAndScrollTo(sId,itemId){
 }
 
 // ── MAIN RENDER ───────────────────────────────────────────────────────────────
+
+function doRefresh() {
+  const btn = document.querySelector('.btn-hdr[onclick="doRefresh()"]');
+  if (btn) { btn.textContent = '⏳'; btn.style.opacity = '0.5'; }
+  // Re-fetch from Firebase if available
+  loadExtraItemsFromFirebase().then(function() {
+    mergeExtraItems();
+    render();
+    if (btn) { btn.innerHTML = '&#8635; Refresh'; btn.style.opacity = '1'; }
+    showToast('✓ Hub refreshed.');
+  });
+}
+
 function render(){
   mergeExtraItems();
   const wk=weekKey(currentMon),wkLbl=weekLabel(currentMon);
@@ -1331,6 +1363,9 @@ function runLogin() {
       if (nl) nl.textContent = u;
       var newBtn = document.getElementById('btn-new-item');
       if (newBtn) { newBtn.style.display = 'flex'; newBtn.onclick = function(){ openAddItemModal(); }; }
+      // Hide redundant Sign Out from main header — admin bar has one
+      var hso = document.getElementById('header-signout');
+      if (hso) hso.style.display = 'none';
     }
     activePmTab = null;
     activeCrTab = null;
@@ -1347,6 +1382,8 @@ function runLogin() {
 function doLogin() { runLogin(); }
 
 function doLogout() {
+  var hso = document.getElementById('header-signout');
+  if (hso) hso.style.display = '';
   currentUser = null;
   var ls = document.getElementById('login-screen');
   var ap = document.getElementById('app');
@@ -1459,8 +1496,11 @@ function renderIntakeForm() {
   let html = '';
   IF_SECTIONS.forEach(sec => {
     const d   = draft[sec.key] || {};
-    const hasContent = (d.notes && d.notes.trim()) || (d.links && d.links.length > 0);
-    html += `<div class="intake-sec${hasContent ? ' if-has-content' : ''}" id="if-wrap-${sec.key}">
+    // items is array of {text, type} where type = 'update'|'action'
+    const items = d.items || (d.notes && d.notes.trim() ? [{text:d.notes, type: d.action?'action':'update'}] : []);
+    const hasContent = items.some(i => i.text && i.text.trim());
+
+    html += `<div class="intake-sec${hasContent?' if-has-content':''}" id="if-wrap-${sec.key}">
       <div class="intake-sec-hdr" onclick="toggleIfSection('${sec.key}')">
         <span class="intake-sec-title">${sec.label}</span>
         <span id="if-arrow-${sec.key}" style="color:rgba(255,255,255,.5);font-size:12px;transition:transform .2s;">▼</span>
@@ -1469,36 +1509,19 @@ function renderIntakeForm() {
 
     if (sec.isPmNote) {
       html += `<div class="if-pm-note">📌 Paste your raw ${sec.label} data below — Claude will automatically format and generate Lens Intelligence from it when you publish.</div><div style="margin-top:12px;">`;
+      html += `<textarea class="if-item-ta" id="if-${sec.key}-raw" placeholder="Paste raw ${sec.label} data here…" style="min-height:120px;">${esc(d.notes||'')}</textarea>`;
+      html += `</div>`;
+    } else {
+      // Render individual items
+      html += `<div id="if-items-${sec.key}">`;
+      const displayItems = items.length > 0 ? items : [];
+      displayItems.forEach((item, idx) => {
+        html += renderIfItem(sec.key, idx, item);
+      });
+      html += `</div>`;
+      html += `<button class="if-add-item-btn" onclick="addIfItem('${sec.key}')">+ Add ${sec.label} Item</button>`;
     }
 
-    html += `
-        <label class="if-label" style="margin-top:${sec.isPmNote?'12':'0'}px;">Notes / Updates</label>
-        <textarea class="if-ta" id="if-${sec.key}-notes" placeholder="Enter updates for ${sec.label}…\n\nUse Enter for new lines. Any context, copy, stats, action items.">${esc(d.notes||'')}</textarea>`;
-
-    if (!sec.isPmNote) {
-      html += `
-        <div class="if-checks">
-          <label class="if-check"><input type="checkbox" id="if-${sec.key}-update" ${d.update?'checked':''}/> Update</label>
-          <label class="if-check"><input type="checkbox" id="if-${sec.key}-action" ${d.action?'checked':''}/> Action Needed</label>
-        </div>`;
-    }
-
-    const savedLinks = d.links || [];
-    html += `
-        <label class="if-label" style="margin-top:14px;">Links</label>
-        <div id="if-links-${sec.key}">`;
-    const displayLinks = savedLinks.length > 0 ? savedLinks : [{ label:'', url:'' }];
-    displayLinks.forEach((lk, i) => {
-      html += `<div class="if-link-row" data-key="${sec.key}">
-        <input class="if-link-in if-link-label" placeholder="Label" value="${esc(lk.label)}" />
-        <input class="if-link-in if-link-url"   placeholder="https://…"  value="${esc(lk.url)}" />
-        <button onclick="removeIfLink(this)" style="background:#fdf0ef;border:1px solid #f0cbc8;border-radius:6px;color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;width:28px;height:28px;">✕</button>
-      </div>`;
-    });
-    html += `</div>
-        <button onclick="addIfLink('${sec.key}')" style="margin-top:6px;padding:5px 13px;background:var(--teal-light);color:var(--teal);border:1px solid #b0d9d4;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">+ Add Link</button>`;
-
-    if (sec.isPmNote) html += '</div>';
     html += `</div></div>`;
   });
 
@@ -1507,9 +1530,71 @@ function renderIntakeForm() {
   // Re-open sections that had content
   IF_SECTIONS.forEach(sec => {
     const d = draft[sec.key] || {};
-    if (d.notes && d.notes.trim()) openIfSection(sec.key);
+    const items = d.items || [];
+    const hasRaw = d.notes && d.notes.trim();
+    if (items.some(i=>i.text&&i.text.trim()) || hasRaw) openIfSection(sec.key);
   });
 }
+
+function renderIfItem(secKey, idx, item) {
+  const type = item.type || 'update';
+  const text = item.text || '';
+  return `<div class="if-item" id="if-item-${secKey}-${idx}">
+    <button class="if-item-del" onclick="removeIfItemEl('${secKey}',${idx})">✕</button>
+    <div class="if-item-header">
+      <div class="if-item-type">
+        <button type="button" class="if-type-btn${type==='update'?' active-update':''}" onclick="setIfItemType('${secKey}',${idx},'update')">Update</button>
+        <button type="button" class="if-type-btn${type==='action'?' active-action':''}" onclick="setIfItemType('${secKey}',${idx},'action')">Action Needed</button>
+      </div>
+    </div>
+    <textarea class="if-item-ta" id="if-item-ta-${secKey}-${idx}" placeholder="Describe this update or action…">${esc(text)}</textarea>
+  </div>`;
+}
+
+function addIfItem(secKey) {
+  const container = document.getElementById('if-items-' + secKey);
+  if (!container) return;
+  const idx = container.querySelectorAll('.if-item').length;
+  const div = document.createElement('div');
+  div.innerHTML = renderIfItem(secKey, idx, {text:'', type:'update'});
+  container.appendChild(div.firstChild);
+  // Renumber after add so indices stay correct
+  renumberIfItems(secKey);
+  // Focus the new textarea
+  const newTa = container.querySelector('.if-item:last-child .if-item-ta');
+  if (newTa) newTa.focus();
+}
+
+function removeIfItemEl(secKey, idx) {
+  const el = document.getElementById('if-item-' + secKey + '-' + idx);
+  if (el) { el.remove(); renumberIfItems(secKey); }
+}
+
+function setIfItemType(secKey, idx, type) {
+  const item = document.getElementById('if-item-' + secKey + '-' + idx);
+  if (!item) return;
+  item.querySelectorAll('.if-type-btn').forEach(b => {
+    b.className = 'if-type-btn';
+    if (b.textContent.trim().toLowerCase().replace(' ','') === type.replace(' ','')) {
+      b.className += type === 'update' ? ' active-update' : ' active-action';
+    }
+  });
+}
+
+function renumberIfItems(secKey) {
+  const container = document.getElementById('if-items-' + secKey);
+  if (!container) return;
+  container.querySelectorAll('.if-item').forEach((el, i) => {
+    el.id = 'if-item-' + secKey + '-' + i;
+    el.querySelectorAll('[id*="if-item-ta-"]').forEach(ta => { ta.id = 'if-item-ta-' + secKey + '-' + i; });
+    el.querySelectorAll('.if-item-del').forEach(b => { b.setAttribute('onclick', `removeIfItemEl('${secKey}',${i})`); });
+    el.querySelectorAll('.if-type-btn').forEach(b => {
+      const t = b.textContent.trim().toLowerCase() === 'update' ? 'update' : 'action';
+      b.setAttribute('onclick', `setIfItemType('${secKey}',${i},'${t}')`);
+    });
+  });
+}
+
 
 function toggleIfSection(key) {
   const body  = document.getElementById('if-body-'+key);
@@ -1540,15 +1625,25 @@ function removeIfLink(btn) { btn.closest('.if-link-row').remove(); }
 function collectIntakeDraft() {
   const draft = { _weekOf: weekLabel(intakeTargetMon || currentMon) };
   IF_SECTIONS.forEach(sec => {
-    const notes    = document.getElementById(`if-${sec.key}-notes`);
-    const actionEl = document.getElementById(`if-${sec.key}-action`);
-    const updateEl = document.getElementById(`if-${sec.key}-update`);
-    draft[sec.key] = {
-      notes:  notes    ? notes.value    : '',
-      update: updateEl ? updateEl.checked : false,
-      action: actionEl ? actionEl.checked : false,
-      links:  getIfLinks(sec.key),
-    };
+    if (sec.isPmNote) {
+      // PM/CallRail: single raw textarea
+      const rawEl = document.getElementById('if-' + sec.key + '-raw');
+      draft[sec.key] = { notes: rawEl ? rawEl.value : '', items: [] };
+    } else {
+      // Regular sections: collect individual items
+      const container = document.getElementById('if-items-' + sec.key);
+      const items = [];
+      if (container) {
+        container.querySelectorAll('.if-item').forEach((el, i) => {
+          const ta = el.querySelector('.if-item-ta');
+          const text = ta ? ta.value.trim() : '';
+          if (!text) return; // skip empty items
+          const activeType = el.querySelector('.if-type-btn.active-action') ? 'action' : 'update';
+          items.push({ text, type: activeType });
+        });
+      }
+      draft[sec.key] = { items, notes: items.map(i=>i.text).join('\n') };
+    }
   });
   return draft;
 }
@@ -1628,23 +1723,32 @@ async function publishIntakeToHub() {
 
   IF_SECTIONS.forEach(sec => {
     const d = draft[sec.key];
-    if (!d || !d.notes || !d.notes.trim()) return;
+    if (!d) return;
 
-    allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
+    if (sec.isPmNote) {
+      if (d.notes && d.notes.trim()) allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
+      return;
+    }
 
-    if (sec.isPmNote) return; // PM/CallRail handled separately via raw display
+    const items = d.items || [];
+    if (items.length === 0) return;
 
     const catName = sec.catName;
-    const newItem = {
-      id:       'if_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-      hot:      !!d.action,
-      approval: false,
-      text:     d.notes.trim().replace(/\n/g, '<br>'),
-      links:    (d.links || []).filter(l => l.url),
-    };
     if (!extra[wk][catName]) extra[wk][catName] = [];
-    extra[wk][catName].push(newItem);
-    publishedCount++;
+
+    allRawContent.push('[' + sec.label + '] ' + items.map(i=>i.text).join(' | '));
+
+    items.forEach(item => {
+      const newItem = {
+        id:       'if_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+        hot:      item.type === 'action',
+        approval: false,
+        text:     item.text.replace(/\n/g, '<br>'),
+        links:    [],
+      };
+      extra[wk][catName].push(newItem);
+      publishedCount++;
+    });
   });
 
   if (!publishedCount && allRawContent.length === 0) {

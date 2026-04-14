@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Lens — SVP Marketing Weekly Highlights</title>
+<title>SVP Lens — Week Hotlist &amp; Highlights</title>
 <!-- Firebase (compat SDK — no build step required) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -491,7 +491,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
         </div>
       </div>
       <div style="width:40px;height:1px;background:rgba(255,255,255,.15);margin:0 auto 16px;"></div>
-      <h2>Weekly Hub</h2>
+      <h2>Week Hotlist &amp; Highlights</h2>
       <p>Sign in to access your portal</p>
     </div>
     <div class="login-body">
@@ -1291,13 +1291,14 @@ function render(){
         inner+=`</div></div>`;
       }
     }
-    const hotCount=active.filter(i=>i.hot).length+activeCarry.filter(co=>co.item.hot).length;
-    const updateCount=active.filter(i=>!i.hot).length+activeCarry.filter(co=>!co.item.hot).length;
-    const totalCount=cat.items.length+catCarryovers.length;
+    // Only count OPEN (unresolved) items in the meta label
+    const hotCount=activeCarry.filter(co=>co.item.hot).length+active.filter(i=>i.hot).length;
+    const updateCount=activeCarry.filter(co=>!co.item.hot).length+active.filter(i=>!i.hot).length;
     const metaParts=[];
     if(updateCount>0) metaParts.push(`${updateCount} update${updateCount!==1?'s':''}`);
     if(hotCount>0) metaParts.push(`<span style="color:var(--red);font-weight:600;">${hotCount} action${hotCount!==1?'s':''}</span>`);
-    const meta=totalCount===0?'No updates this week':metaParts.length>0?metaParts.join(' · '):'No open items';
+    const hasOpen=hotCount>0||updateCount>0;
+    const meta=!hasAnything?'No updates this week':hasOpen?metaParts.join(' · '):'All resolved';
     html+=makeCollapsible('cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase(),cat.name,meta,inner,'navy');
   });
   html+=`</div>`;
@@ -1730,6 +1731,54 @@ function mergeExtraItems() {
   });
 }
 
+
+// ── PAID MEDIA INTAKE → PM FORMAT VIA CLAUDE API ─────────────────────────────
+async function parsePaidMediaToHub(rawContent, wk, wkLabel_str) {
+  const pmKey = wk; // use same key as week
+  const dateRange = wkLabel_str.replace('/26','').replace('/26',''); // e.g. "4/6 – 4/10"
+
+  const prompt = 'You are formatting paid media insights for a marketing weekly hub. ' +
+    'Parse the following raw paid media content and return a JSON object. ' +
+    'Split items into OCLI/Organic section and LBOV/Refractive/LASIK section. ' +
+    'For each bullet point create an item. If a bullet has sub-bullets, include them as a "sub" array. ' +
+    'If an item has a recommendation or note callout, put it in "rec" or "note" field. ' +
+    'Bold key metrics and numbers using <strong> tags. ' +
+    'Return ONLY valid JSON, no markdown, in this exact format: ' +
+    '{"dateRange":"4/6 – 4/10","intro":"Brief intro sentence.","ocli":[{"id":"pm_new_oc1","text":"Item text with <strong>bold</strong> metrics","sub":["sub bullet 1"],"note":"optional note","rec":"optional recommendation"}],"lasik":[{"id":"pm_new_lv1","text":"Item text"}]} ' +
+    'Raw content: ' + rawContent;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const raw = data.content && data.content[0] ? data.content[0].text : null;
+    if (!raw) return null;
+
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Ensure unique IDs with timestamp
+    const ts = Date.now();
+    if (parsed.ocli)  parsed.ocli.forEach((item, i)  => { item.id = 'pm_new_oc_' + ts + '_' + i; });
+    if (parsed.lasik) parsed.lasik.forEach((item, i) => { item.id = 'pm_new_lv_' + ts + '_' + i; });
+    parsed.dateRange = parsed.dateRange || wkLabel_str;
+
+    return parsed;
+  } catch(e) {
+    console.warn('PM parse error:', e);
+    return null;
+  }
+}
+
 async function publishIntakeToHub() {
   const draft = collectIntakeDraft();
   persistIntakeDraft(draft);
@@ -1757,7 +1806,14 @@ async function publishIntakeToHub() {
     if (!d) return;
 
     if (sec.isPmNote) {
-      if (d.notes && d.notes.trim()) allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
+      if (d.notes && d.notes.trim()) {
+        allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
+        // Handle Paid Media specially — parse and add as new PM tab
+        if (sec.key === 'paid-media') {
+          _pendingPmRaw = d.notes.trim();
+          _pendingPmWk  = wk;
+        }
+      }
       return;
     }
 
@@ -1874,6 +1930,28 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
   currentMon = new Date(intakeTargetMon.getTime()); // clone to avoid reference issues
 
   // Force a fresh merge so new items are definitely in WEEKS before render
+  // ── Process Paid Media if raw content was provided ──────────────────────
+  if (_pendingPmRaw && _pendingPmWk) {
+    if (pubBtn) { pubBtn.textContent = '⏳ Parsing Paid Media…'; }
+    const wkLblStr = weekLabel(intakeTargetMon);
+    const pmParsed = await parsePaidMediaToHub(_pendingPmRaw, _pendingPmWk, wkLblStr);
+    if (pmParsed) {
+      PM[_pendingPmWk] = pmParsed;
+      // Point the week to the new PM tab
+      if (WEEKS[_pendingPmWk]) WEEKS[_pendingPmWk].pmKey = _pendingPmWk;
+      // Save PM to Firebase
+      try {
+        if (_db) await _db.collection('svplens').doc('pmData').set({ [_pendingPmWk]: pmParsed });
+      } catch(e) {}
+      showToast('✓ Paid Media insights parsed and added as new tab!');
+    } else {
+      showToast('⚠ Could not parse Paid Media — check Firebase config. Raw content saved.', true);
+    }
+    _pendingPmRaw = null;
+    _pendingPmWk  = null;
+    if (pubBtn) { pubBtn.textContent = '🚀 Publish to Hub'; pubBtn.disabled = false; }
+  }
+
   mergeExtraItems();
 
   const pubWkLabel = weekLabel(currentMon);
@@ -1887,6 +1965,8 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
 // ── LENS INTELLIGENCE MANAGEMENT ─────────────────────────────────────────────
 // Holds the working intel array while admin is editing the intake form
 var _pendingIntel = []; // [{cat, text}]
+var _pendingPmRaw = null;
+var _pendingPmWk  = null;
 
 function renderIntelPreview() {
   var body = document.getElementById('intel-preview-body');

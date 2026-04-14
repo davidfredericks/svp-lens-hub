@@ -656,8 +656,8 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 //  FIREBASE CONFIG — paste your values from Firebase Console here
 // ═══════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyDmDCQUTnf6G5vCnQz6xALH3Ci54wLhs0M"
-  authDomain:        "svp-hotlist-lens.firebaseapp.com"
+  apiKey:            "AIzaSyDmDCQUTnf6G5vCnQz6xALH3Ci54wLhs0M",
+  authDomain:        "svp-hotlist-lens.firebaseapp.com",
   projectId:         "svp-hotlist-lens",
   storageBucket:     "svp-hotlist-lens.firebasestorage.app",
   messagingSenderId: "772715955796",
@@ -671,7 +671,7 @@ let _fbReady = false;
 
 function initFirebase() {
   try {
-    if (FIREBASE_CONFIG.apiKey === 'REPLACE_WITH_YOUR_API_KEY') {
+    if (FIREBASE_CONFIG.apiKey === 'NOT_CONFIGURED') {
       console.warn('SVP Hub: Firebase not configured — using localStorage fallback. See deployment guide.');
       return;
     }

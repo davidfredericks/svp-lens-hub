@@ -1245,11 +1245,11 @@ function render(){
       const plain=item.text.replace(/<[^>]+>/g,'');
       let sId='';
       for(const cat of wd.categories){if(cat.items.find(i=>i.id===item.id)){sId='cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase();break;}}
-      html+=`<div class="sum-item"><div class="sum-dot"></div><div class="sum-inner"><div class="sum-meta">${WEEKS[wk]?WEEKS[wk].label:wk}${item.approval?' — Approval Needed':''}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><button class="sum-go" onclick="openAndScrollTo('${sId}','${item.id}')">↓ Go</button></div>`;
+      html+=`<div class="sum-item"><div class="sum-dot"></div><div class="sum-inner"><div class="sum-meta">${WEEKS[wk]?WEEKS[wk].label:wk}${item.approval?' — Approval Needed':''}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><div style="display:flex;gap:5px;flex-shrink:0;">${currentUser&&currentUser.role==='admin'?`<button class="sum-go" style="background:#fdf0ef;color:var(--red);border-color:#f0cbc8;" onclick="removeItem('${wk}','${item.id}')">✕</button>`:''}<button class="sum-go" onclick="openAndScrollTo('${sId}','${item.id}')">↓ Go</button></div></div>`;
     } else {
       const plain=co.text.replace(/<[^>]+>/g,'');
       const sId='cat-'+co.catName.replace(/[\s\/&]+/g,'-').toLowerCase();
-      html+=`<div class="sum-item"><div class="sum-dot" style="background:var(--gold)"></div><div class="sum-inner"><div class="sum-meta" style="color:#9a7020;">Carried — ${co.wkLabel}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><button class="sum-go" onclick="openAndScrollTo('${sId}','${co.id}')">↓ Go</button></div>`;
+      html+=`<div class="sum-item"><div class="sum-dot" style="background:var(--gold)"></div><div class="sum-inner"><div class="sum-meta" style="color:#9a7020;">Carried — ${co.wkLabel}</div><div>${plain.slice(0,80)}${plain.length>80?'…':''}</div></div><div style="display:flex;gap:5px;flex-shrink:0;">${currentUser&&currentUser.role==='admin'?`<button class="sum-go" style="background:#fdf0ef;color:var(--red);border-color:#f0cbc8;" onclick="removeItem('${co.wk}','${co.id}')">✕</button>`:''}<button class="sum-go" onclick="openAndScrollTo('${sId}','${co.id}')">↓ Go</button></div></div>`;
     }
   });
   html+=`</div></div>`;

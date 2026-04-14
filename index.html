@@ -1217,12 +1217,10 @@ function render(){
 
   const totalActionItems=openHot.length+carryovers.length;
   // Count resolved carryovers too (items from past weeks resolved THIS session)
-  // Resolved this week = this week's own resolved items
-  // + any carryover items (carried INTO this week) that were resolved
-  // Does NOT include items resolved in prior weeks when viewing those weeks
-  const allCarryoversIntoThisWk = getAllHotCarryovers(wk); // all past hot items (resolved or not)
-  const resolvedCarryoversHere  = allCarryoversIntoThisWk.filter(co => getItemState(co.wk,co.id).resolved);
-  const totalResolved = resolvedHot.length + resolvedCarryoversHere.length;
+  // Resolved this week = ONLY this week's own hot items that are resolved
+  // Carryover items belong to their original week — resolving them doesn't
+  // count toward THIS week's resolved total
+  const totalResolved = resolvedHot.length;
 
   document.getElementById('stat-carry').textContent=carryovers.length;
   document.getElementById('stat-hot').textContent=totalActionItems;

@@ -4,8 +4,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 217 235'><path d='M150.7 0c37.6 20.2 63.1 59.9 63.1 105.5 0 66.1-53.6 119.8-119.8 119.8-11.8 0-23.1-1.7-33.9-4.9 16.9 9.1 36.2 14.2 56.6 14.2 66.1 0 119.8-53.6 119.8-119.8.1-54.3-36.1-100.2-85.8-114.8z' fill='%2332b9b4'/><path d='M174.5 79.4c8.6 32.3-.3 68.2-26.4 92.7-37.8 35.5-97.2 33.7-132.7-4.1C9.1 161.3 4 153.9 0 146.1c3.9 14.5 11.3 28.3 22.3 40 35.5 37.8 94.9 39.6 132.7 4.1 31-29.2 37.8-74.6 19.5-110.8z' fill='%2398dcd9'/><path d='M51.2 177.4c-25.1-22.1-37.5-57-29.3-91.8 11.8-50.5 62.3-81.8 112.8-70 9 2.1 17.3 5.5 25 9.8-11.3-9.9-25-17.3-40.7-21C68.4-7.4 17.9 23.9 6.1 74.4c-9.7 41.5 9.8 83 45.1 103z' fill='%2365cac7'/></svg>" />
-<title>SVP Lens — Week Hotlist &amp; Highlights</title>
+<title>Lens — SVP Marketing Weekly Highlights</title>
 <!-- Firebase (compat SDK — no build step required) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -492,7 +491,7 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
         </div>
       </div>
       <div style="width:40px;height:1px;background:rgba(255,255,255,.15);margin:0 auto 16px;"></div>
-      <h2>Week Hotlist &amp; Highlights</h2>
+      <h2>Weekly Hub</h2>
       <p>Sign in to access your portal</p>
     </div>
     <div class="login-body">
@@ -657,12 +656,12 @@ footer a{color:rgba(255,255,255,.5);text-decoration:none;}
 //  FIREBASE CONFIG — paste your values from Firebase Console here
 // ═══════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyDmDCQUTnf6G5vCnQz6xALH3Ci54wLhs0M",
-  authDomain:        "svp-hotlist-lens.firebaseapp.com",
-  projectId:         "svp-hotlist-lens",
-  storageBucket:     "svp-hotlist-lens.firebasestorage.app",
-  messagingSenderId: "772715955796",
-  appId:             "1:772715955796:web:bef3a9c946092edaa00fc1",
+  apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+  authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+  projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+  storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId:             "REPLACE_WITH_YOUR_APP_ID",
 };
 // ═══════════════════════════════════════════════════════════════
 
@@ -672,7 +671,7 @@ let _fbReady = false;
 
 function initFirebase() {
   try {
-    if (FIREBASE_CONFIG.apiKey === 'NOT_CONFIGURED') {
+    if (FIREBASE_CONFIG.apiKey === 'REPLACE_WITH_YOUR_API_KEY') {
       console.warn('SVP Hub: Firebase not configured — using localStorage fallback. See deployment guide.');
       return;
     }
@@ -1292,14 +1291,9 @@ function render(){
         inner+=`</div></div>`;
       }
     }
-    // Only count OPEN (unresolved) items in the meta label
-    const hotCount=activeCarry.filter(co=>co.item.hot).length+active.filter(i=>i.hot).length;
-    const updateCount=activeCarry.filter(co=>!co.item.hot).length+active.filter(i=>!i.hot).length;
-    const metaParts=[];
-    if(updateCount>0) metaParts.push(`${updateCount} update${updateCount!==1?'s':''}`);
-    if(hotCount>0) metaParts.push(`<span style="color:var(--red);font-weight:600;">${hotCount} action${hotCount!==1?'s':''}</span>`);
-    const hasOpen=hotCount>0||updateCount>0;
-    const meta=!hasAnything?'No updates this week':hasOpen?metaParts.join(' · '):'All resolved';
+    const hotCount=active.filter(i=>i.hot).length+activeCarry.filter(co=>co.item.hot).length;
+    const totalCount=cat.items.length+catCarryovers.length;
+    const meta=totalCount===0?'No updates':`${totalCount} update${totalCount!==1?'s':''}${hotCount>0?` · <span style="color:var(--red);font-weight:600;">${hotCount} action${hotCount>1?'s':''}</span>`:''}`;
     html+=makeCollapsible('cat-'+cat.name.replace(/[\s\/&]+/g,'-').toLowerCase(),cat.name,meta,inner,'navy');
   });
   html+=`</div>`;
@@ -1537,8 +1531,27 @@ function renderIntakeForm() {
       <div class="intake-sec-body" id="if-body-${sec.key}" style="display:none;">`;
 
     if (sec.isPmNote) {
-      html += `<div class="if-pm-note">📌 Paste your raw ${sec.label} data below — Claude will automatically format and generate Lens Intelligence from it when you publish.</div><div style="margin-top:12px;">`;
-      html += `<textarea class="if-item-ta" id="if-${sec.key}-raw" placeholder="Paste raw ${sec.label} data here…" style="min-height:120px;">${esc(d.notes||'')}</textarea>`;
+      // For Paid Media: show dashboard buttons above the textarea
+      if (sec.key === 'paid-media') {
+        html += `<div style="background:var(--navy);border-radius:10px 10px 0 0;padding:12px 16px 10px;margin-bottom:0;">
+          <div style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Dashboard Links</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="pm-dash-btn ocli" href="${DASH_OCLI}" target="_blank" rel="noopener">${EXT}&nbsp;<span style="display:flex;flex-direction:column;line-height:1.2;"><span style="font-size:9px;opacity:.7;letter-spacing:.08em;">OCLI VISION</span><span>Paid Media Dashboard</span></span></a>
+            <a class="pm-dash-btn lasik" href="${DASH_LASIK}" target="_blank" rel="noopener">${EXT}&nbsp;<span style="display:flex;flex-direction:column;line-height:1.2;"><span style="font-size:9px;opacity:.7;letter-spacing:.08em;">LASIK BY OCLI VISION</span><span>Paid Media Dashboard</span></span></a>
+          </div>
+        </div>`;
+      }
+      // For CallRail: show the QA link button above the textarea
+      if (sec.key === 'callrail') {
+        html += `<div style="background:var(--navy);border-radius:10px 10px 0 0;padding:12px 16px 10px;margin-bottom:0;">
+          <div style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Dashboard Link</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="cr-link-btn" href="#" target="_blank" rel="noopener">${EXT}&nbsp;CallRail QA Check Running.xlsx</a>
+          </div>
+        </div>`;
+      }
+      html += `<div class="if-pm-note" style="border-radius:0;margin-top:0;">📌 Paste your raw ${sec.label} data below — Claude will automatically parse, format, and generate Lens Intelligence from it when you publish.</div><div style="margin-top:0;">`;
+      html += `<textarea class="if-item-ta" id="if-${sec.key}-raw" placeholder="Paste raw ${sec.label} data here…" style="min-height:120px;border-radius:0 0 10px 10px;">${esc(d.notes||'')}</textarea>`;
       html += `</div>`;
     } else {
       // Render individual items
@@ -1720,6 +1733,13 @@ function mergeExtraItems() {
     if (extra[wk]._meta && extra[wk]._meta.intelligence) {
       WEEKS[wk].intelligence = extra[wk]._meta.intelligence;
     }
+    // Restore PM entry from _meta if present
+    if (extra[wk]._meta && extra[wk]._meta.pm) {
+      if (!PM[wk]) {
+        PM[wk] = extra[wk]._meta.pm;
+        WEEKS[wk].pmKey = wk;
+      }
+    }
     Object.keys(extra[wk]).forEach(catName => {
       if (catName === '_meta') return; // skip metadata
       const cat = WEEKS[wk].categories.find(c => c.name === catName);
@@ -1733,51 +1753,132 @@ function mergeExtraItems() {
 }
 
 
-// ── PAID MEDIA INTAKE → PM FORMAT VIA CLAUDE API ─────────────────────────────
-async function parsePaidMediaToHub(rawContent, wk, wkLabel_str) {
-  const pmKey = wk; // use same key as week
-  const dateRange = wkLabel_str.replace('/26','').replace('/26',''); // e.g. "4/6 – 4/10"
+// ── RAW PAID MEDIA PARSER ─────────────────────────────────────────────────────
+// Parses free-form PM raw text from intake into PM[] structured entry.
+// Splits on OCLI/Organic vs LASIK/Refractive headings.
+function parsePmRawIntoWeek(raw, wk, extra) {
+  const wkObj = WEEKS[wk];
+  if (!wkObj) return;
 
-  const prompt = 'You are formatting paid media insights for a marketing weekly hub. ' +
-    'Parse the following raw paid media content and return a JSON object. ' +
-    'Split items into OCLI/Organic section and LBOV/Refractive/LASIK section. ' +
-    'For each bullet point create an item. If a bullet has sub-bullets, include them as a "sub" array. ' +
-    'If an item has a recommendation or note callout, put it in "rec" or "note" field. ' +
-    'Bold key metrics and numbers using <strong> tags. ' +
-    'Return ONLY valid JSON, no markdown, in this exact format: ' +
-    '{"dateRange":"4/6 – 4/10","intro":"Brief intro sentence.","ocli":[{"id":"pm_new_oc1","text":"Item text with <strong>bold</strong> metrics","sub":["sub bullet 1"],"note":"optional note","rec":"optional recommendation"}],"lasik":[{"id":"pm_new_lv1","text":"Item text"}]} ' +
-    'Raw content: ' + rawContent;
+  // Build a date-range label from the week key (e.g. "4/14 – 4/18")
+  const mon = getMondayOf(wk.replace('week_',''));
+  const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+4);
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  const drLabel = `${fmt(mon)} – ${fmt(fri)}`;
 
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+  // Detect a title line for the intro (first non-empty line)
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const introLine = lines[0] || `Paid media highlights for the week of ${drLabel}.`;
+
+  // Split into OCLI and LASIK sections
+  const ocliLines = [], lasikLines = [];
+  let mode = 'intro';
+  lines.forEach(line => {
+    const lo = line.toLowerCase();
+    if (lo.includes('ocli') || lo.includes('organic')) mode = 'ocli';
+    else if (lo.includes('lasik') || lo.includes('lbov') || lo.includes('refractive')) mode = 'lasik';
+    if (mode === 'ocli') ocliLines.push(line);
+    else if (mode === 'lasik') lasikLines.push(line);
+  });
+
+  // Convert lines to PM items — bullet lines (•, -, *) become sub-items of prior parent
+  function linesToItems(lineArr, prefix) {
+    const items = [];
+    let parent = null;
+    lineArr.forEach((line, i) => {
+      if (/^[•\-\*]/.test(line)) {
+        const clean = line.replace(/^[•\-\*]\s*/, '');
+        if (parent) { parent.sub = parent.sub || []; parent.sub.push(clean); }
+        else items.push({ id: prefix + '_' + i, text: clean });
+      } else if (line.length > 2) {
+        parent = { id: prefix + '_' + i, text: line };
+        items.push(parent);
+      }
     });
-
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    const raw = data.content && data.content[0] ? data.content[0].text : null;
-    if (!raw) return null;
-
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-
-    // Ensure unique IDs with timestamp
-    const ts = Date.now();
-    if (parsed.ocli)  parsed.ocli.forEach((item, i)  => { item.id = 'pm_new_oc_' + ts + '_' + i; });
-    if (parsed.lasik) parsed.lasik.forEach((item, i) => { item.id = 'pm_new_lv_' + ts + '_' + i; });
-    parsed.dateRange = parsed.dateRange || wkLabel_str;
-
-    return parsed;
-  } catch(e) {
-    console.warn('PM parse error:', e);
-    return null;
+    return items;
   }
+
+  const pmEntry = {
+    dateRange: drLabel,
+    intro: introLine,
+    ocli:  ocliLines.length  ? linesToItems(ocliLines,  'pm_ocli_'+wk)  : [{id:'pm_ocli_empty_'+wk, text:'No OCLI highlights submitted for this period.'}],
+    lasik: lasikLines.length ? linesToItems(lasikLines, 'pm_lasik_'+wk) : [{id:'pm_lasik_empty_'+wk, text:'No LASIK highlights submitted for this period.'}],
+  };
+
+  PM[wk] = pmEntry;
+  wkObj.pmKey = wk;
+  // Store reference in extra so Firebase persists it
+  if (!extra[wk]) extra[wk] = {};
+  if (!extra[wk]._meta) extra[wk]._meta = {};
+  extra[wk]._meta.pm = pmEntry;
+}
+
+// ── RAW CALLRAIL PARSER ───────────────────────────────────────────────────────
+// Parses free-form CallRail raw text from intake into CALLRAIL[] structured entry.
+// Expected shape (flexible): PPC: X/Y apps ... N Calls N Under 1 min N Abandoned
+//                            Outreach Materials: ...
+//                            Website: ...
+//                            Link: ...
+function parseCrRawIntoWeek(raw, wk) {
+  const wkObj = WEEKS[wk];
+  if (!wkObj) return;
+
+  const mon = getMondayOf(wk.replace('week_',''));
+  const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+4);
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  const drLabel = `${fmt(mon)} – ${fmt(fri)}`;
+
+  // Extract link line
+  const linkMatch = raw.match(/Link[:\s]+([^\n]+)/i);
+  const linkLabel = linkMatch ? linkMatch[1].replace(/__/g,'').trim() : 'CallRail QA Check Running.xlsx';
+
+  // Parse a source block: name, score, stats, notes
+  function parseSource(name, block) {
+    if (!block) return null;
+    // Score: X/Y at start
+    const scoreMatch = block.match(/(\d+)\/(\d+)\s*(?:apps?\s*made)?/i);
+    const appsMade = scoreMatch ? `${scoreMatch[1]}/${scoreMatch[2]}` : '–/–';
+
+    // Stats: look for "N Calls", "N Under 1 min", "N Abandoned"
+    const callsMatch    = block.match(/(\d+)\s*Calls/i);
+    const underMatch    = block.match(/(\d+)\s*Under\s*1\s*min/i);
+    const abandonMatch  = block.match(/(\d+)\s*Abandoned/i);
+
+    const totalCalls  = callsMatch   ? parseInt(callsMatch[1])   : 0;
+    const underOneMin = underMatch   ? parseInt(underMatch[1])   : 0;
+    const abandoned   = abandonMatch ? parseInt(abandonMatch[1]) : 0;
+
+    // Notes: everything after the score line, stripping the stat lines
+    const notes = block
+      .replace(/(\d+)\/(\d+)\s*(apps?\s*made)?/i, '')
+      .replace(/\d+\s*Calls/ig, '')
+      .replace(/\d+\s*Under\s*1\s*min/ig, '')
+      .replace(/\d+\s*Abandoned/ig, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const idBase = `cr_${wk}_${name.toLowerCase().replace(/\s+/g,'_')}`;
+    return { id: idBase, name, appsMade, totalCalls, underOneMin, abandoned, notes };
+  }
+
+  // Split text into named sections
+  const ppcMatch     = raw.match(/PPC[:\s]+([\s\S]*?)(?=Outreach Materials|Website|Link:|$)/i);
+  const outMatch     = raw.match(/Outreach Materials[:\s]+([\s\S]*?)(?=Website|Link:|$)/i);
+  const webMatch     = raw.match(/Website[:\s]+([\s\S]*?)(?=Link:|$)/i);
+
+  const sources = [];
+  const ppc = parseSource('PPC',               ppcMatch  ? ppcMatch[1]  : null);
+  const out = parseSource('Outreach Materials', outMatch  ? outMatch[1]  : null);
+  const web = parseSource('Website',            webMatch  ? webMatch[1]  : null);
+  if (ppc) sources.push(ppc);
+  if (out) sources.push(out);
+  if (web) sources.push(web);
+
+  if (!sources.length) return; // nothing parseable
+
+  const crEntry = { dateRange: drLabel, linkLabel, linkUrl: '#', sources };
+  CALLRAIL[wk] = crEntry;
+  wkObj.crKey = wk;
 }
 
 async function publishIntakeToHub() {
@@ -1808,12 +1909,16 @@ async function publishIntakeToHub() {
 
     if (sec.isPmNote) {
       if (d.notes && d.notes.trim()) {
-        allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
-        // Handle Paid Media specially — parse and add as new PM tab
+        allRawContent.push('[' + sec.label + ']\n' + d.notes.trim());
+        // Parse PM raw text into PM[] structured entry
         if (sec.key === 'paid-media') {
-          _pendingPmRaw = d.notes.trim();
-          _pendingPmWk  = wk;
+          parsePmRawIntoWeek(d.notes.trim(), wk, extra);
         }
+        // Parse CallRail raw text into CALLRAIL[] structured entry
+        if (sec.key === 'callrail') {
+          parseCrRawIntoWeek(d.notes.trim(), wk);
+        }
+        publishedCount++;
       }
       return;
     }
@@ -1929,30 +2034,11 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
 
   // Navigate hub to the published week so admin sees results immediately
   currentMon = new Date(intakeTargetMon.getTime()); // clone to avoid reference issues
+  // Auto-select the new PM and CR tabs so they're visible immediately
+  if (PM[wk])       activePmTab = wk;
+  if (CALLRAIL[wk]) activeCrTab = wk;
 
   // Force a fresh merge so new items are definitely in WEEKS before render
-  // ── Process Paid Media if raw content was provided ──────────────────────
-  if (_pendingPmRaw && _pendingPmWk) {
-    if (pubBtn) { pubBtn.textContent = '⏳ Parsing Paid Media…'; }
-    const wkLblStr = weekLabel(intakeTargetMon);
-    const pmParsed = await parsePaidMediaToHub(_pendingPmRaw, _pendingPmWk, wkLblStr);
-    if (pmParsed) {
-      PM[_pendingPmWk] = pmParsed;
-      // Point the week to the new PM tab
-      if (WEEKS[_pendingPmWk]) WEEKS[_pendingPmWk].pmKey = _pendingPmWk;
-      // Save PM to Firebase
-      try {
-        if (_db) await _db.collection('svplens').doc('pmData').set({ [_pendingPmWk]: pmParsed });
-      } catch(e) {}
-      showToast('✓ Paid Media insights parsed and added as new tab!');
-    } else {
-      showToast('⚠ Could not parse Paid Media — check Firebase config. Raw content saved.', true);
-    }
-    _pendingPmRaw = null;
-    _pendingPmWk  = null;
-    if (pubBtn) { pubBtn.textContent = '🚀 Publish to Hub'; pubBtn.disabled = false; }
-  }
-
   mergeExtraItems();
 
   const pubWkLabel = weekLabel(currentMon);
@@ -1966,8 +2052,6 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
 // ── LENS INTELLIGENCE MANAGEMENT ─────────────────────────────────────────────
 // Holds the working intel array while admin is editing the intake form
 var _pendingIntel = []; // [{cat, text}]
-var _pendingPmRaw = null;
-var _pendingPmWk  = null;
 
 function renderIntelPreview() {
   var body = document.getElementById('intel-preview-body');

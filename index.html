@@ -1323,27 +1323,7 @@ function highlightItem(id){
 async function submitComment(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);if(!ta)return;const msg=ta.value.trim();if(!msg)return;setItemState(wk,id,{clientResponse:msg});render();showToast('✓ Comment saved.');sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg,action_type:'Comment added'});}
 async function resolveItem(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);const msg=ta?ta.value.trim():'';setItemState(wk,id,{resolved:true,clientResponse:msg});render();showToast('✓ Item resolved.');sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg||'(no comment)',action_type:'Item resolved ✓'});}
 function reopenItem(wk,id){setItemState(wk,id,{resolved:false});render();}
-function changeWeek(dir,jumpToKey){
-  if(jumpToKey) currentMon=getMondayOf(jumpToKey.replace('week_',''));
-  else currentMon=addWeeks(currentMon,dir);
-  // Sync PM tab to the hub week if that week has PM data, otherwise keep closest
-  const wk=weekKey(currentMon);
-  const wd=WEEKS[wk];
-  if(wd && wd.pmKey && PM[wd.pmKey]) activePmTab=wd.pmKey;
-  else { // find nearest PM week <= current
-    const pmWks=Object.keys(PM).sort();
-    const match=pmWks.filter(k=>k<=wk).pop();
-    if(match) activePmTab=match;
-  }
-  // Sync CR tab to the hub week if that week has CR data, otherwise keep closest
-  if(wd && wd.crKey && CALLRAIL[wd.crKey]) activeCrTab=wd.crKey;
-  else { // find nearest CR week <= current
-    const crWks=Object.keys(CALLRAIL).sort();
-    const match=crWks.filter(k=>k<=wk).pop();
-    if(match) activeCrTab=match;
-  }
-  render();
-}
+function changeWeek(dir,jumpToKey){if(jumpToKey)currentMon=getMondayOf(jumpToKey.replace('week_',''));else currentMon=addWeeks(currentMon,dir);render();}
 function setPmTab(k){activePmTab=k;render();}
 
 // render() called after login — see doLogin()
@@ -1446,7 +1426,7 @@ function setAdminMode(mode) {
 // ════════════════════════════════════════════════════════════════════════════
 //  INTAKE FORM
 // ════════════════════════════════════════════════════════════════════════════
-const INTAKE_DRAFT_KEY = 'svp_intake_draft_v2';
+const INTAKE_DRAFT_KEY = 'svp_intake_draft_v3'; // per-week storage
 const WEEKS_EXTRA_KEY  = 'svp_weeks_extra_v2'; // published items from intake
 
 const IF_SECTIONS = [
@@ -1463,11 +1443,17 @@ const IF_SECTIONS = [
 ];
 
 function loadIntakeDraft() {
-  try { return JSON.parse(localStorage.getItem(INTAKE_DRAFT_KEY)) || {}; }
+  // Load draft scoped to the current intake week
+  const wk = intakeTargetMon ? weekKey(intakeTargetMon) : 'unknown';
+  const key = INTAKE_DRAFT_KEY + '_' + wk;
+  try { return JSON.parse(localStorage.getItem(key)) || {}; }
   catch(e) { return {}; }
 }
 function persistIntakeDraft(data) {
-  localStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(data));
+  // Save draft scoped to the current intake week
+  const wk = intakeTargetMon ? weekKey(intakeTargetMon) : 'unknown';
+  const key = INTAKE_DRAFT_KEY + '_' + wk;
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
 function getIfVal(key, field) {
@@ -1495,8 +1481,20 @@ function initIntakeWeek() {
 }
 
 function changeIntakeWeek(dir) {
+  // Auto-save current week's draft before navigating away
+  const currentDraft = collectIntakeDraft();
+  const hasContent = Object.keys(currentDraft).some(k => {
+    if (k === '_weekOf') return false;
+    const d = currentDraft[k];
+    return (d.notes && d.notes.trim()) || (d.items && d.items.some(i => i.text && i.text.trim()));
+  });
+  if (hasContent) persistIntakeDraft(currentDraft);
+
+  // Move to the new week
   intakeTargetMon = addWeeks(intakeTargetMon, dir);
-  updateIntakeWeekNav();
+
+  // Re-render the form fresh for the new week (loads that week's saved draft if any)
+  renderIntakeForm();
 }
 
 function updateIntakeWeekNav() {
@@ -1703,8 +1701,9 @@ function saveIntakeDraft() {
 }
 
 function clearIntakeForm() {
-  if (!confirm('Clear all intake form data? This cannot be undone.')) return;
-  localStorage.removeItem(INTAKE_DRAFT_KEY);
+  if (!confirm('Clear this week\'s intake data? This cannot be undone.')) return;
+  const wk = intakeTargetMon ? weekKey(intakeTargetMon) : 'unknown';
+  localStorage.removeItem(INTAKE_DRAFT_KEY + '_' + wk);
   renderIntakeForm();
   document.getElementById('intake-status').textContent = 'Form cleared.';
 }

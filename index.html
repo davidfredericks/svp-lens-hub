@@ -1323,7 +1323,27 @@ function highlightItem(id){
 async function submitComment(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);if(!ta)return;const msg=ta.value.trim();if(!msg)return;setItemState(wk,id,{clientResponse:msg});render();showToast('✓ Comment saved.');sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg,action_type:'Comment added'});}
 async function resolveItem(wk,id,itemLabel){const ta=document.getElementById('ta-'+id);const msg=ta?ta.value.trim():'';setItemState(wk,id,{resolved:true,clientResponse:msg});render();showToast('✓ Item resolved.');sendNotification({week:weekLabel(currentMon),section:'Weekly Highlights',item:itemLabel,message:msg||'(no comment)',action_type:'Item resolved ✓'});}
 function reopenItem(wk,id){setItemState(wk,id,{resolved:false});render();}
-function changeWeek(dir,jumpToKey){if(jumpToKey)currentMon=getMondayOf(jumpToKey.replace('week_',''));else currentMon=addWeeks(currentMon,dir);render();}
+function changeWeek(dir,jumpToKey){
+  if(jumpToKey) currentMon=getMondayOf(jumpToKey.replace('week_',''));
+  else currentMon=addWeeks(currentMon,dir);
+  // Sync PM tab to the hub week if that week has PM data, otherwise keep closest
+  const wk=weekKey(currentMon);
+  const wd=WEEKS[wk];
+  if(wd && wd.pmKey && PM[wd.pmKey]) activePmTab=wd.pmKey;
+  else { // find nearest PM week <= current
+    const pmWks=Object.keys(PM).sort();
+    const match=pmWks.filter(k=>k<=wk).pop();
+    if(match) activePmTab=match;
+  }
+  // Sync CR tab to the hub week if that week has CR data, otherwise keep closest
+  if(wd && wd.crKey && CALLRAIL[wd.crKey]) activeCrTab=wd.crKey;
+  else { // find nearest CR week <= current
+    const crWks=Object.keys(CALLRAIL).sort();
+    const match=crWks.filter(k=>k<=wk).pop();
+    if(match) activeCrTab=match;
+  }
+  render();
+}
 function setPmTab(k){activePmTab=k;render();}
 
 // render() called after login — see doLogin()
@@ -1470,8 +1490,8 @@ function getIfLinks(key) {
 let intakeTargetMon = null; // set on login to next week
 
 function initIntakeWeek() {
-  // Default to current week — admin is filling out this week's data
-  intakeTargetMon = new Date(currentMon.getTime());
+  // Default to next week (most common: filling out next week's items)
+  intakeTargetMon = addWeeks(currentMon, 1);
 }
 
 function changeIntakeWeek(dir) {
@@ -1555,8 +1575,7 @@ function renderIntakeForm() {
     const d = draft[sec.key] || {};
     const items = d.items || [];
     const hasRaw = d.notes && d.notes.trim();
-    const hasItems = items.some(i=>i.text&&i.text.trim());
-    if (hasItems || hasRaw) openIfSection(sec.key);
+    if (items.some(i=>i.text&&i.text.trim()) || hasRaw) openIfSection(sec.key);
   });
 }
 

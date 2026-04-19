@@ -1470,8 +1470,8 @@ function getIfLinks(key) {
 let intakeTargetMon = null; // set on login to next week
 
 function initIntakeWeek() {
-  // Default to next week (most common: filling out next week's items)
-  intakeTargetMon = addWeeks(currentMon, 1);
+  // Default to current week — admin is filling out this week's data
+  intakeTargetMon = new Date(currentMon.getTime());
 }
 
 function changeIntakeWeek(dir) {
@@ -1531,27 +1531,8 @@ function renderIntakeForm() {
       <div class="intake-sec-body" id="if-body-${sec.key}" style="display:none;">`;
 
     if (sec.isPmNote) {
-      // For Paid Media: show dashboard buttons above the textarea
-      if (sec.key === 'paid-media') {
-        html += `<div style="background:var(--navy);border-radius:10px 10px 0 0;padding:12px 16px 10px;margin-bottom:0;">
-          <div style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Dashboard Links</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a class="pm-dash-btn ocli" href="${DASH_OCLI}" target="_blank" rel="noopener">${EXT}&nbsp;<span style="display:flex;flex-direction:column;line-height:1.2;"><span style="font-size:9px;opacity:.7;letter-spacing:.08em;">OCLI VISION</span><span>Paid Media Dashboard</span></span></a>
-            <a class="pm-dash-btn lasik" href="${DASH_LASIK}" target="_blank" rel="noopener">${EXT}&nbsp;<span style="display:flex;flex-direction:column;line-height:1.2;"><span style="font-size:9px;opacity:.7;letter-spacing:.08em;">LASIK BY OCLI VISION</span><span>Paid Media Dashboard</span></span></a>
-          </div>
-        </div>`;
-      }
-      // For CallRail: show the QA link button above the textarea
-      if (sec.key === 'callrail') {
-        html += `<div style="background:var(--navy);border-radius:10px 10px 0 0;padding:12px 16px 10px;margin-bottom:0;">
-          <div style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Dashboard Link</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a class="cr-link-btn" href="#" target="_blank" rel="noopener">${EXT}&nbsp;CallRail QA Check Running.xlsx</a>
-          </div>
-        </div>`;
-      }
-      html += `<div class="if-pm-note" style="border-radius:0;margin-top:0;">📌 Paste your raw ${sec.label} data below — Claude will automatically parse, format, and generate Lens Intelligence from it when you publish.</div><div style="margin-top:0;">`;
-      html += `<textarea class="if-item-ta" id="if-${sec.key}-raw" placeholder="Paste raw ${sec.label} data here…" style="min-height:120px;border-radius:0 0 10px 10px;">${esc(d.notes||'')}</textarea>`;
+      html += `<div class="if-pm-note">📌 Paste your raw ${sec.label} data below — Claude will automatically format and generate Lens Intelligence from it when you publish.</div><div style="margin-top:12px;">`;
+      html += `<textarea class="if-item-ta" id="if-${sec.key}-raw" placeholder="Paste raw ${sec.label} data here…" style="min-height:120px;">${esc(d.notes||'')}</textarea>`;
       html += `</div>`;
     } else {
       // Render individual items
@@ -1574,7 +1555,8 @@ function renderIntakeForm() {
     const d = draft[sec.key] || {};
     const items = d.items || [];
     const hasRaw = d.notes && d.notes.trim();
-    if (items.some(i=>i.text&&i.text.trim()) || hasRaw) openIfSection(sec.key);
+    const hasItems = items.some(i=>i.text&&i.text.trim());
+    if (hasItems || hasRaw) openIfSection(sec.key);
   });
 }
 
@@ -1733,13 +1715,6 @@ function mergeExtraItems() {
     if (extra[wk]._meta && extra[wk]._meta.intelligence) {
       WEEKS[wk].intelligence = extra[wk]._meta.intelligence;
     }
-    // Restore PM entry from _meta if present
-    if (extra[wk]._meta && extra[wk]._meta.pm) {
-      if (!PM[wk]) {
-        PM[wk] = extra[wk]._meta.pm;
-        WEEKS[wk].pmKey = wk;
-      }
-    }
     Object.keys(extra[wk]).forEach(catName => {
       if (catName === '_meta') return; // skip metadata
       const cat = WEEKS[wk].categories.find(c => c.name === catName);
@@ -1750,135 +1725,6 @@ function mergeExtraItems() {
       });
     });
   });
-}
-
-
-// ── RAW PAID MEDIA PARSER ─────────────────────────────────────────────────────
-// Parses free-form PM raw text from intake into PM[] structured entry.
-// Splits on OCLI/Organic vs LASIK/Refractive headings.
-function parsePmRawIntoWeek(raw, wk, extra) {
-  const wkObj = WEEKS[wk];
-  if (!wkObj) return;
-
-  // Build a date-range label from the week key (e.g. "4/14 – 4/18")
-  const mon = getMondayOf(wk.replace('week_',''));
-  const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+4);
-  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
-  const drLabel = `${fmt(mon)} – ${fmt(fri)}`;
-
-  // Detect a title line for the intro (first non-empty line)
-  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-  const introLine = lines[0] || `Paid media highlights for the week of ${drLabel}.`;
-
-  // Split into OCLI and LASIK sections
-  const ocliLines = [], lasikLines = [];
-  let mode = 'intro';
-  lines.forEach(line => {
-    const lo = line.toLowerCase();
-    if (lo.includes('ocli') || lo.includes('organic')) mode = 'ocli';
-    else if (lo.includes('lasik') || lo.includes('lbov') || lo.includes('refractive')) mode = 'lasik';
-    if (mode === 'ocli') ocliLines.push(line);
-    else if (mode === 'lasik') lasikLines.push(line);
-  });
-
-  // Convert lines to PM items — bullet lines (•, -, *) become sub-items of prior parent
-  function linesToItems(lineArr, prefix) {
-    const items = [];
-    let parent = null;
-    lineArr.forEach((line, i) => {
-      if (/^[•\-\*]/.test(line)) {
-        const clean = line.replace(/^[•\-\*]\s*/, '');
-        if (parent) { parent.sub = parent.sub || []; parent.sub.push(clean); }
-        else items.push({ id: prefix + '_' + i, text: clean });
-      } else if (line.length > 2) {
-        parent = { id: prefix + '_' + i, text: line };
-        items.push(parent);
-      }
-    });
-    return items;
-  }
-
-  const pmEntry = {
-    dateRange: drLabel,
-    intro: introLine,
-    ocli:  ocliLines.length  ? linesToItems(ocliLines,  'pm_ocli_'+wk)  : [{id:'pm_ocli_empty_'+wk, text:'No OCLI highlights submitted for this period.'}],
-    lasik: lasikLines.length ? linesToItems(lasikLines, 'pm_lasik_'+wk) : [{id:'pm_lasik_empty_'+wk, text:'No LASIK highlights submitted for this period.'}],
-  };
-
-  PM[wk] = pmEntry;
-  wkObj.pmKey = wk;
-  // Store reference in extra so Firebase persists it
-  if (!extra[wk]) extra[wk] = {};
-  if (!extra[wk]._meta) extra[wk]._meta = {};
-  extra[wk]._meta.pm = pmEntry;
-}
-
-// ── RAW CALLRAIL PARSER ───────────────────────────────────────────────────────
-// Parses free-form CallRail raw text from intake into CALLRAIL[] structured entry.
-// Expected shape (flexible): PPC: X/Y apps ... N Calls N Under 1 min N Abandoned
-//                            Outreach Materials: ...
-//                            Website: ...
-//                            Link: ...
-function parseCrRawIntoWeek(raw, wk) {
-  const wkObj = WEEKS[wk];
-  if (!wkObj) return;
-
-  const mon = getMondayOf(wk.replace('week_',''));
-  const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+4);
-  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
-  const drLabel = `${fmt(mon)} – ${fmt(fri)}`;
-
-  // Extract link line
-  const linkMatch = raw.match(/Link[:\s]+([^\n]+)/i);
-  const linkLabel = linkMatch ? linkMatch[1].replace(/__/g,'').trim() : 'CallRail QA Check Running.xlsx';
-
-  // Parse a source block: name, score, stats, notes
-  function parseSource(name, block) {
-    if (!block) return null;
-    // Score: X/Y at start
-    const scoreMatch = block.match(/(\d+)\/(\d+)\s*(?:apps?\s*made)?/i);
-    const appsMade = scoreMatch ? `${scoreMatch[1]}/${scoreMatch[2]}` : '–/–';
-
-    // Stats: look for "N Calls", "N Under 1 min", "N Abandoned"
-    const callsMatch    = block.match(/(\d+)\s*Calls/i);
-    const underMatch    = block.match(/(\d+)\s*Under\s*1\s*min/i);
-    const abandonMatch  = block.match(/(\d+)\s*Abandoned/i);
-
-    const totalCalls  = callsMatch   ? parseInt(callsMatch[1])   : 0;
-    const underOneMin = underMatch   ? parseInt(underMatch[1])   : 0;
-    const abandoned   = abandonMatch ? parseInt(abandonMatch[1]) : 0;
-
-    // Notes: everything after the score line, stripping the stat lines
-    const notes = block
-      .replace(/(\d+)\/(\d+)\s*(apps?\s*made)?/i, '')
-      .replace(/\d+\s*Calls/ig, '')
-      .replace(/\d+\s*Under\s*1\s*min/ig, '')
-      .replace(/\d+\s*Abandoned/ig, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    const idBase = `cr_${wk}_${name.toLowerCase().replace(/\s+/g,'_')}`;
-    return { id: idBase, name, appsMade, totalCalls, underOneMin, abandoned, notes };
-  }
-
-  // Split text into named sections
-  const ppcMatch     = raw.match(/PPC[:\s]+([\s\S]*?)(?=Outreach Materials|Website|Link:|$)/i);
-  const outMatch     = raw.match(/Outreach Materials[:\s]+([\s\S]*?)(?=Website|Link:|$)/i);
-  const webMatch     = raw.match(/Website[:\s]+([\s\S]*?)(?=Link:|$)/i);
-
-  const sources = [];
-  const ppc = parseSource('PPC',               ppcMatch  ? ppcMatch[1]  : null);
-  const out = parseSource('Outreach Materials', outMatch  ? outMatch[1]  : null);
-  const web = parseSource('Website',            webMatch  ? webMatch[1]  : null);
-  if (ppc) sources.push(ppc);
-  if (out) sources.push(out);
-  if (web) sources.push(web);
-
-  if (!sources.length) return; // nothing parseable
-
-  const crEntry = { dateRange: drLabel, linkLabel, linkUrl: '#', sources };
-  CALLRAIL[wk] = crEntry;
-  wkObj.crKey = wk;
 }
 
 async function publishIntakeToHub() {
@@ -1908,18 +1754,7 @@ async function publishIntakeToHub() {
     if (!d) return;
 
     if (sec.isPmNote) {
-      if (d.notes && d.notes.trim()) {
-        allRawContent.push('[' + sec.label + ']\n' + d.notes.trim());
-        // Parse PM raw text into PM[] structured entry
-        if (sec.key === 'paid-media') {
-          parsePmRawIntoWeek(d.notes.trim(), wk, extra);
-        }
-        // Parse CallRail raw text into CALLRAIL[] structured entry
-        if (sec.key === 'callrail') {
-          parseCrRawIntoWeek(d.notes.trim(), wk);
-        }
-        publishedCount++;
-      }
+      if (d.notes && d.notes.trim()) allRawContent.push('[' + sec.label + '] ' + d.notes.trim());
       return;
     }
 
@@ -2034,9 +1869,6 @@ Return ONLY a JSON array with this exact format (no other text, no markdown):
 
   // Navigate hub to the published week so admin sees results immediately
   currentMon = new Date(intakeTargetMon.getTime()); // clone to avoid reference issues
-  // Auto-select the new PM and CR tabs so they're visible immediately
-  if (PM[wk])       activePmTab = wk;
-  if (CALLRAIL[wk]) activeCrTab = wk;
 
   // Force a fresh merge so new items are definitely in WEEKS before render
   mergeExtraItems();
